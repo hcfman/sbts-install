@@ -3,6 +3,10 @@
 
 UPDATED=
 
+APP_FILE="stalkedbythestate_app_jetson_v1.00.tar.gz"
+APP_URL="https://github.com/hcfman/stalkedbythestate/releases/download/stalkedbythestate_app_jetson_v1.00/$APP_FILE"
+APP_CHECKSUM="9191ba89947291033d297e2c962d81c2"
+
 disk_list=()
 
 abort() {
@@ -387,14 +391,27 @@ migrate_sbts_dir() {
     fi
 }
 
+download_latests_app_release() {
+    cd "$HERE" || abort "Can't change back to $HERE"
+
+    if [ ! -f "$APP_FILE" ] ; then
+	wget "$APP_URL" || abort "Can't download latest app release from $APP_URL"
+    fi
+
+    [[ -f "$APP_FILE" ]] || abort "File $APP_FILE disappeared"
+
+    [[ "$(md5sum $APP_FILE | awk '{print $1}')" == "$APP_CHECKSUM" ]] || abort "Checksum of latest release doens't match the release, not proceeding"
+}
+
 unpack_app() {
     cd "$SUDO_USER_HOME" || abort "Can't change directory to $SUDO_USER_HOME"
+
 
     if [ -d "app" ] ; then
 	return
     fi
 
-    tar xvzf "$HERE/stalkedbythestate_app_jetson_1.00.tar.gz" || abort "Can't unpack application tree \"app\" into home directory"
+    tar xvzf "$HERE/$APP_FILE" || abort "Can't unpack application tree \"app\" into home directory"
 
     if fgrep '${admin.user}' "$SUDO_USER_HOME/app/tomcat/apache-tomcat-9.0.45/conf/tomcat-users.xml" > /dev/null ; then
 	if ! perl -pi -e "s%\\\$\\{admin\\.user\\}%${tomcat_username}%g" "$SUDO_USER_HOME/app/tomcat/apache-tomcat-9.0.45/conf/tomcat-users.xml" ; then
@@ -403,7 +420,7 @@ unpack_app() {
     fi
 
     if fgrep '${admin.password}' "$SUDO_USER_HOME/app/tomcat/apache-tomcat-9.0.45/conf/tomcat-users.xml" > /dev/null ; then
-	if ! perl -pi -e "s%\\\$\\{admin\\.password\\}%${tomcat_password}%g" /home/sbts/app/tomcat/apache-tomcat-9.0.45/conf/tomcat-users.xml ; then
+	if ! perl -pi -e "s%\\\$\\{admin\\.password\\}%${tomcat_password}%g" "$SUDO_USER_HOME/app/tomcat/apache-tomcat-9.0.45/conf/tomcat-users.xml" ; then
 	    abort "Can't alter the tomcat Password"
 	fi
     fi
@@ -494,6 +511,8 @@ migrate_apache2_sites-available
 install_darknet
 
 install_alexeyab_darknet
+
+download_latests_app_release
 
 unpack_app
 
