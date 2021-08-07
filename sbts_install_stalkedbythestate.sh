@@ -476,6 +476,52 @@ move_disk_to_disk_partition() {
     migrate_sbts_dir "$SUDO_USER_HOME/app/cacerts" "$SUDO_USER_HOME/config/sbts"
 }
 
+install_secure() {
+    cd "$HERE" || abort "Can't change back to $HERE"
+
+    if [ -f "$SUDO_USER_HOME/sbts-secure/config.json" -a -f "$SUDO_USER_HOME/sbts-secure/secure.py" -a -d "$SUDO_USER_HOME/sbts-secure/secureparse" -a -d "$SUDO_USER_HOME/config/secure/resources" ] ; then
+	return
+    fi
+
+    echo ""
+    echo "Installing secure"
+    echo ""
+
+    if [ ! -d "$SUDO_USER_HOME/sbts-secure" ] ; then
+	sudo -u "$SUDO_USER" mkdir "$SUDO_USER_HOME/sbts-secure" || abort "Can't create $SUDO_USER_HOME/sbts-secure"
+    fi
+
+    if ! sudo -u "$SUDO_USER" cp -r resources/secure/secure.py resources/secure/secureparse "$SUDO_USER_HOME/sbts-secure" ; then
+	abort "Can't install the \"secure\" program"
+    fi
+
+    if [ ! -d "$SUDO_USER_HOME/config/secure" ] ; then
+	mkdir "$SUDO_USER_HOME/config/secure" || abort "Can't create directory $SUDO_USER_HOME/config/secure"
+    fi
+
+    if [ ! -d "$SUDO_USER_HOME/config/secure/resources" ] ; then
+	mkdir "$SUDO_USER_HOME/config/secure/resources" || abort "Can't create $SUDO_USER_HOME/config/secure/resources"
+    fi
+
+    if ! chown "$SUDO_USER:$SUDO_USER" "$SUDO_USER_HOME/config/secure/resources" ; then
+	abort "Can't chown $SUDO_USER:$SUDO_USER $SUDO_USER_HOME/config/secure/resources"
+    fi
+
+    if ! sudo -u "$SUDO_USER" cp -r resources/secure/config.json "$SUDO_USER_HOME/config/secure/resources" ; then
+	abort "Can't install config.json to $SUDO_USER_HOME/config/secure/resources"
+    fi
+
+    if [ ! -L "$SUDO_USER_HOME/sbts-secure/resources" ] ; then
+	if ! ln -s "$SUDO_USER_HOME/config/secure/resources" "$SUDO_USER_HOME/sbts-secure/resources" ; then
+	    abort "Can't create symlink from $SUDO_USER_HOME/config/secure/resources to $SUDO_USER_HOME/sbts-secure/resources"
+	fi
+    fi
+}
+
+update_etc_rc() {
+    :
+}
+
 #
 # Main
 #
@@ -521,6 +567,10 @@ update_udev_rules
 install_tomcat
 
 move_disk_to_disk_partition
+
+install_secure
+
+update_etc_rc
 
 echo ""
 echo "Successfully installed stalkedbythestate"

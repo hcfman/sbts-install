@@ -1,0 +1,10 @@
+#!/bin/bash
+
+nvpmodel -m 2
+/usr/bin/jetson_clocks -fan
+
+su - sbts -c '/home/sbts/bin/start_yolo_server.sh > /dev/null 2>&1 &' &
+
+su - sbts -c '/home/sbts/app/bin/start.sh > /dev/null 2>&1 & cd /home/sbts/bin || exit 1;sleep 10 ; ./start_secure.sh > /dev/null 2>&1 &' &
+
+exit 0
