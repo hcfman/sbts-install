@@ -516,6 +516,18 @@ install_secure() {
 	    abort "Can't create symlink from $SUDO_USER_HOME/config/secure/resources to $SUDO_USER_HOME/sbts-secure/resources"
 	fi
     fi
+
+    if fgrep '${admin.user}' "$SUDO_USER_HOME/config/secure/resources/config.json" > /dev/null ; then
+	if ! perl -pi -e "s%\\\$\\{admin\\.user\\}%${tomcat_username}%g" "$SUDO_USER_HOME/config/secure/resources/config.json" ; then
+	    abort "Can't alter the config.json Username"
+	fi
+    fi
+
+    if fgrep '${admin.password}' "$SUDO_USER_HOME/config/secure/resources/config.json" > /dev/null ; then
+	if ! perl -pi -e "s%\\\$\\{admin\\.password\\}%${tomcat_password}%g" "$SUDO_USER_HOME/config/secure/resources/config.json" ; then
+	    abort "Can't alter the tomcat Password"
+	fi
+    fi
 }
 
 update_etc_rc() {
