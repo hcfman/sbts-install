@@ -494,7 +494,7 @@ move_disk_to_disk_partition() {
 install_secure() {
     cd "$HERE" || abort "Can't change back to $HERE"
 
-    if [ -f "$SUDO_USER_HOME/sbts-secure/config.json" -a -f "$SUDO_USER_HOME/sbts-secure/secure.py" -a -d "$SUDO_USER_HOME/sbts-secure/secureparse" -a -d "$SUDO_USER_HOME/config/secure/resources" ] ; then
+    if [ -f "$SUDO_USER_HOME/sbts-secure/config.json" -a -f "$SUDO_USER_HOME/sbts-secure/secure.py" -a -f "" -a -d "$SUDO_USER_HOME/sbts-secure/secureparse" -a -d "$SUDO_USER_HOME/config/secure/resources" ] ; then
 	return
     fi
 
@@ -506,7 +506,7 @@ install_secure() {
 	sudo -u "$SUDO_USER" mkdir "$SUDO_USER_HOME/sbts-secure" || abort "Can't create $SUDO_USER_HOME/sbts-secure"
     fi
 
-    if ! sudo -u "$SUDO_USER" cp -r resources/secure/secure.py resources/secure/secureparse "$SUDO_USER_HOME/sbts-secure" ; then
+    if ! sudo -u "$SUDO_USER" cp -p -r resources/secure/secure.py resources/secure/start_secure.sh resources/secure/secureparse "$SUDO_USER_HOME/sbts-secure" ; then
 	abort "Can't install the \"secure\" program"
     fi
 
@@ -545,8 +545,70 @@ install_secure() {
     fi
 }
 
+determine_partition_base() {
+    partition_base_path=$(findmnt -n / | sed -e 's/1$//')
+}
+
 update_etc_rc() {
-    :
+    if [ -f "/etc/rc.local" ] ; then
+	return
+    fi
+
+    cd "$HERE" || abort "Can't change back to $HERE"
+
+    cat > /etc/rc.local <<EOF
+#!/bin/bash
+
+/usr/bin/jetson_clocks --fan
+EOF
+
+    chmod +x /etc/rc.local
+
+    case "$PLATFORM_LABEL" in
+        "NVIDIA Jetson Nano Developer Kit")
+            PLATFORM_BRANCH=sbts-jetson-nano
+            echo nvpmodel -m 0 >> /etc/rc.local
+            ;;
+        "NVIDIA Jetson Xavier NX Developer Kit")
+            PLATFORM_BRANCH=sbts-jetson-xavier-nx
+            echo nvpmodel -m 2 >> /etc/rc.local
+            ;;
+        "Jetson-AGX")
+            PLATFORM_BRANCH=sbts-jetson-xavier-agx
+            echo nvpmodel -m 0 >> /etc/rc.local
+            ;;
+        *)
+            abort "Cannot determine the platform type"
+            ;;
+    esac
+
+    echo "" >> /etc/rc.local
+
+    cat >> /etc/rc.local <<EOF
+fsck -y "${partition_base_path}2"
+fsck -y "${partition_base_path}3"
+
+mount "${partition_base_path}2" "${SUDO_USER_HOME}/config"
+mount "${partition_base_path}3" "${SUDO_USER_HOME}/disk"
+
+systemctl start apache2
+
+# Choose just one of the below, comment out the ones that are not chosen
+su - "${SUDO_USER}" -c "${SUDO_USER_HOME}/darknet/start_sbts_yolov3_server.sh > /dev/null 2>&1 &" &
+#su - "${SUDO_USER}" -c "${SUDO_USER_HOME}/alexyab_darknet/start_sbts_yolov3_server.sh > /dev/null 2>&1 &" &
+#su - "${SUDO_USER}" -c "${SUDO_USER_HOME}/start_sbts_yolov4_server.sh > /dev/null 2>&1 &" &
+
+sleep 20
+
+#su - "${SUDO_USER}" -c "${SUDO_USER_HOME}/sbts-secure/vlc_front.sh > /dev/null 2>&1 &' &
+#su - "${SUDO_USER}" -c "${SUDO_USER_HOME}/sbts-secure/vlc_back.sh > /dev/null 2>&1 &' &
+
+su - "${SUDO_USER}" -c "${SUDO_USER_HOME}/app/bin/start.sh" > /dev/null 2>&1
+su - "${SUDO_USER}" -c "${SUDO_USER_HOME}/sbts-secure/start_secure.sh" > /dev/null 2>&1
+
+exit 0
+    chmod +x /etc/rc.local
+EOF
 }
 
 #
@@ -598,6 +660,8 @@ install_tomcat
 move_disk_to_disk_partition
 
 install_secure
+
+determine_partition_base
 
 update_etc_rc
 
