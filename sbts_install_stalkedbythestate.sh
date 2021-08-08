@@ -4,6 +4,10 @@
 
 UPDATED=
 
+APP_FILE="stalkedbythestate_app_jetson_v1.00.tar.gz"
+APP_URL="https://github.com/hcfman/stalkedbythestate/releases/download/stalkedbythestate_app_jetson_v1.00/$APP_FILE"
+APP_CHECKSUM="9191ba89947291033d297e2c962d81c2"
+
 disk_list=()
 
 abort() {
@@ -388,14 +392,27 @@ migrate_sbts_dir() {
     fi
 }
 
+download_latests_app_release() {
+    cd "$HERE" || abort "Can't change back to $HERE"
+
+    if [ ! -f "$APP_FILE" ] ; then
+	wget "$APP_URL" || abort "Can't download latest app release from $APP_URL"
+    fi
+
+    [[ -f "$APP_FILE" ]] || abort "File $APP_FILE disappeared"
+
+    [[ "$(md5sum $APP_FILE | awk '{print $1}')" == "$APP_CHECKSUM" ]] || abort "Checksum of latest release doens't match the release, not proceeding"
+}
+
 unpack_app() {
     cd "$SUDO_USER_HOME" || abort "Can't change directory to $SUDO_USER_HOME"
+
 
     if [ -d "app" ] ; then
 	return
     fi
 
-    tar xvzf "$HERE/stalkedbythestate_app_jetson_1.00.tar.gz" || abort "Can't unpack application tree \"app\" into home directory"
+    tar xvzf "$HERE/$APP_FILE" || abort "Can't unpack application tree \"app\" into home directory"
 
     if fgrep '${admin.user}' "$SUDO_USER_HOME/app/tomcat/apache-tomcat-9.0.45/conf/tomcat-users.xml" > /dev/null ; then
 	if ! perl -pi -e "s%\\\$\\{admin\\.user\\}%${tomcat_username}%g" "$SUDO_USER_HOME/app/tomcat/apache-tomcat-9.0.45/conf/tomcat-users.xml" ; then
@@ -404,7 +421,7 @@ unpack_app() {
     fi
 
     if fgrep '${admin.password}' "$SUDO_USER_HOME/app/tomcat/apache-tomcat-9.0.45/conf/tomcat-users.xml" > /dev/null ; then
-	if ! perl -pi -e "s%\\\$\\{admin\\.password\\}%${tomcat_password}%g" /home/sbts/app/tomcat/apache-tomcat-9.0.45/conf/tomcat-users.xml ; then
+	if ! perl -pi -e "s%\\\$\\{admin\\.password\\}%${tomcat_password}%g" "$SUDO_USER_HOME/app/tomcat/apache-tomcat-9.0.45/conf/tomcat-users.xml" ; then
 	    abort "Can't alter the tomcat Password"
 	fi
     fi
@@ -460,6 +477,64 @@ move_disk_to_disk_partition() {
     migrate_sbts_dir "$SUDO_USER_HOME/app/cacerts" "$SUDO_USER_HOME/config/sbts"
 }
 
+install_secure() {
+    cd "$HERE" || abort "Can't change back to $HERE"
+
+    if [ -f "$SUDO_USER_HOME/sbts-secure/config.json" -a -f "$SUDO_USER_HOME/sbts-secure/secure.py" -a -d "$SUDO_USER_HOME/sbts-secure/secureparse" -a -d "$SUDO_USER_HOME/config/secure/resources" ] ; then
+	return
+    fi
+
+    echo ""
+    echo "Installing secure"
+    echo ""
+
+    if [ ! -d "$SUDO_USER_HOME/sbts-secure" ] ; then
+	sudo -u "$SUDO_USER" mkdir "$SUDO_USER_HOME/sbts-secure" || abort "Can't create $SUDO_USER_HOME/sbts-secure"
+    fi
+
+    if ! sudo -u "$SUDO_USER" cp -r resources/secure/secure.py resources/secure/secureparse "$SUDO_USER_HOME/sbts-secure" ; then
+	abort "Can't install the \"secure\" program"
+    fi
+
+    if [ ! -d "$SUDO_USER_HOME/config/secure" ] ; then
+	mkdir "$SUDO_USER_HOME/config/secure" || abort "Can't create directory $SUDO_USER_HOME/config/secure"
+    fi
+
+    if [ ! -d "$SUDO_USER_HOME/config/secure/resources" ] ; then
+	mkdir "$SUDO_USER_HOME/config/secure/resources" || abort "Can't create $SUDO_USER_HOME/config/secure/resources"
+    fi
+
+    if ! chown "$SUDO_USER:$SUDO_USER" "$SUDO_USER_HOME/config/secure/resources" ; then
+	abort "Can't chown $SUDO_USER:$SUDO_USER $SUDO_USER_HOME/config/secure/resources"
+    fi
+
+    if ! sudo -u "$SUDO_USER" cp -r resources/secure/config.json "$SUDO_USER_HOME/config/secure/resources" ; then
+	abort "Can't install config.json to $SUDO_USER_HOME/config/secure/resources"
+    fi
+
+    if [ ! -L "$SUDO_USER_HOME/sbts-secure/resources" ] ; then
+	if ! ln -s "$SUDO_USER_HOME/config/secure/resources" "$SUDO_USER_HOME/sbts-secure/resources" ; then
+	    abort "Can't create symlink from $SUDO_USER_HOME/config/secure/resources to $SUDO_USER_HOME/sbts-secure/resources"
+	fi
+    fi
+
+    if fgrep '${admin.user}' "$SUDO_USER_HOME/config/secure/resources/config.json" > /dev/null ; then
+	if ! perl -pi -e "s%\\\$\\{admin\\.user\\}%${tomcat_username}%g" "$SUDO_USER_HOME/config/secure/resources/config.json" ; then
+	    abort "Can't alter the config.json Username"
+	fi
+    fi
+
+    if fgrep '${admin.password}' "$SUDO_USER_HOME/config/secure/resources/config.json" > /dev/null ; then
+	if ! perl -pi -e "s%\\\$\\{admin\\.password\\}%${tomcat_password}%g" "$SUDO_USER_HOME/config/secure/resources/config.json" ; then
+	    abort "Can't alter the tomcat Password"
+	fi
+    fi
+}
+
+update_etc_rc() {
+    :
+}
+
 #
 # Main
 #
@@ -496,6 +571,8 @@ install_darknet
 
 install_alexeyab_darknet
 
+download_latests_app_release
+
 unpack_app
 
 update_udev_rules
@@ -503,6 +580,10 @@ update_udev_rules
 install_tomcat
 
 move_disk_to_disk_partition
+
+install_secure
+
+update_etc_rc
 
 echo ""
 echo "Successfully installed stalkedbythestate"
