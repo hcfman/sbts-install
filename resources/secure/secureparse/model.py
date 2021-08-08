@@ -1,3 +1,5 @@
+# Copyright (c) 2021 Kim Hendrikse
+
 import requests
 import time
 import threading
