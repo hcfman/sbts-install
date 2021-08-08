@@ -527,7 +527,7 @@ install_secure() {
     fi
 
     if [ ! -L "$SUDO_USER_HOME/sbts-secure/resources" ] ; then
-	if ! ln -s "$SUDO_USER_HOME/config/secure/resources" "$SUDO_USER_HOME/sbts-secure/resources" ; then
+	if ! sudo -u "$SUDO_USER" ln -s "$SUDO_USER_HOME/config/secure/resources" "$SUDO_USER_HOME/sbts-secure/resources" ; then
 	    abort "Can't create symlink from $SUDO_USER_HOME/config/secure/resources to $SUDO_USER_HOME/sbts-secure/resources"
 	fi
     fi
