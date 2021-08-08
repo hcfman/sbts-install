@@ -7,7 +7,7 @@ abort() {
 }
 
 HERE=$(dirname $0)
-cd "$HERE/sbts-secure" || abort "Can't change to script directory"
+cd "$HERE" || abort "Can't change to script directory"
 
 while [ 1 ] ; do
     ./secure.py resources/config.json

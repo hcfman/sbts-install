@@ -494,7 +494,7 @@ move_disk_to_disk_partition() {
 install_secure() {
     cd "$HERE" || abort "Can't change back to $HERE"
 
-    if [ -f "$SUDO_USER_HOME/sbts-secure/config.json" -a -f "$SUDO_USER_HOME/sbts-secure/secure.py" -a -f "" -a -d "$SUDO_USER_HOME/sbts-secure/secureparse" -a -d "$SUDO_USER_HOME/config/secure/resources" ] ; then
+    if [ -f "$SUDO_USER_HOME/sbts-secure/config.json" -a -f "$SUDO_USER_HOME/sbts-secure/secure.py" -a -f "$SUDO_USER_HOME/sbts-secure/start_secure.sh" -a -f "" -a -d "$SUDO_USER_HOME/sbts-secure/secureparse" -a -d "$SUDO_USER_HOME/config/secure/resources" ] ; then
 	return
     fi
 
@@ -546,7 +546,7 @@ install_secure() {
 }
 
 determine_partition_base() {
-    partition_base_path=$(findmnt -n / | sed -e 's/1$//')
+    partition_base_path=$(findmnt -n / | awk '{print $2}' | sed -e 's/1$//')
 }
 
 update_etc_rc() {
@@ -585,11 +585,11 @@ EOF
     echo "" >> /etc/rc.local
 
     cat >> /etc/rc.local <<EOF
-fsck -y "${partition_base_path}2"
-fsck -y "${partition_base_path}3"
+fsck -y ${partition_base_path}2
+fsck -y ${partition_base_path}3
 
-mount "${partition_base_path}2" "${SUDO_USER_HOME}/config"
-mount "${partition_base_path}3" "${SUDO_USER_HOME}/disk"
+mount ${partition_base_path}2 ${SUDO_USER_HOME}/config
+mount ${partition_base_path}3 ${SUDO_USER_HOME}/disk
 
 systemctl start apache2
 
@@ -603,12 +603,54 @@ sleep 20
 #su - "${SUDO_USER}" -c "${SUDO_USER_HOME}/sbts-secure/vlc_front.sh > /dev/null 2>&1 &' &
 #su - "${SUDO_USER}" -c "${SUDO_USER_HOME}/sbts-secure/vlc_back.sh > /dev/null 2>&1 &' &
 
-su - "${SUDO_USER}" -c "${SUDO_USER_HOME}/app/bin/start.sh" > /dev/null 2>&1
-su - "${SUDO_USER}" -c "${SUDO_USER_HOME}/sbts-secure/start_secure.sh" > /dev/null 2>&1
+su - "${SUDO_USER}" -c "${SUDO_USER_HOME}/app/bin/start.sh" > /dev/null 2>&1 &
+
+su - "${SUDO_USER}" -c "${SUDO_USER_HOME}/sbts-secure/start_secure.sh" > /dev/null 2>&1 &
 
 exit 0
-    chmod +x /etc/rc.local
 EOF
+    chmod +x /etc/rc.local
+
+    systemctl stop apache2
+    systemctl disable apache2
+
+    if grep "^${partition_base_path}1" /etc/fstab > /dev/null || grep "^${partition_base_path}3" /etc/fstab > /dev/null ; then
+	if ! perl -pi -e "s%^${partition_base_path}%#${partition_base_path}%" /etc/fstab ; then
+	    abort "Can't modify /etc/fstab"
+	fi
+    fi
+}
+
+#
+# As something else re-enabled docker (Probably the docker.socket service)
+#
+# The installed docker location is incompatible with this mode of operation as it would need to run on top of
+# an overlayFS which doesn't work. If you need docker, then you will ensure that the docker that docker uses to write
+# things to is on a normal read/write location. Such as somewhere under SUDO_USER_HOME/disk. Note also, you would likely also
+# have to stop docker from starting and start it again in /etc/rc.local after the disks are mounted, much like is done with apache
+#
+disable_docker_again() {
+    systemctl stop docker.service
+    systemctl stop docker.socket
+    systemctl disable docker.service
+    systemctl disable docker.socket
+}
+
+make_readonly_and_reboot() {
+    if ! "${SUDO_USER_HOME}/sbts-bin/make_readonly.sh" ; then
+	abort "Can't set the system to boot into read-only mode"
+    fi
+
+    echo ""
+    echo "Successfully installed stalkedbythestate"
+    echo ""
+
+    echo "A reboot is now required to finish installation. After the reboot, the system will be running on read-only mode"
+    echo ""
+
+    echo "Rebooting in 10 seconds..."
+    sleep 10
+    reboot
 }
 
 #
@@ -665,5 +707,6 @@ determine_partition_base
 
 update_etc_rc
 
-echo ""
-echo "Successfully installed stalkedbythestate"
+disable_docker_again
+
+make_readonly_and_reboot
