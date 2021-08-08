@@ -1,5 +1,7 @@
 #!/usr/bin/python3
 
+# Copyright (c) 2021 Kim Hendrikse
+
 import sys
 import re
 from ftplib import FTP
