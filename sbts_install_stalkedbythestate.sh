@@ -295,7 +295,7 @@ install_darknet() {
     fi
 
     YOLOV3_WEIGHTS_LOCATION="https://pjreddie.com/media/files/yolov3.weights"
-    if ! wget "$YOLOV3_WEIGHTS_LOCATION" ; then
+    if ! sudo -u "$SUDO_USER" wget "$YOLOV3_WEIGHTS_LOCATION" ; then
         cd "$SUDO_USER_HOME" && rm -rf darknet
         abort "Can't copy yolov3.weights from $YOLOV3_WEIGHTS_LOCATION"
     fi
@@ -369,7 +369,7 @@ install_alexeyab_darknet() {
     fi
 
     YOLOV4_WEIGHTS_LOCATION="https://github.com/AlexeyAB/darknet/releases/download/darknet_yolo_v3_optimal/yolov4.weights"
-    if ! su "$SUDO_USER" -c "wget \"$YOLOV4_WEIGHTS_LOCATION\"" ; then
+    if ! sudo -u "$SUDO_USER" wget "$YOLOV4_WEIGHTS_LOCATION" ; then
         cd "$SUDO_USER_HOME" && rm -rf alexyab_darknet
         abort "Can't copy yolov4.weights from $YOLOV4_WEIGHTS_LOCATION"
     fi
@@ -410,7 +410,7 @@ download_latests_app_release() {
     cd "$HERE" || abort "Can't change back to $HERE"
 
     if [ ! -f "$APP_FILE" ] ; then
-	wget "$APP_URL" || abort "Can't download latest app release from $APP_URL"
+	sudo -u "$SUDO_USER" wget "$APP_URL" || abort "Can't download latest app release from $APP_URL"
     fi
 
     [[ -f "$APP_FILE" ]] || abort "File $APP_FILE disappeared"
