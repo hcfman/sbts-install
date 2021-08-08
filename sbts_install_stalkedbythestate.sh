@@ -141,6 +141,20 @@ install_packages() {
     done
 }
 
+remove_apache_default_pages() {
+    cd "$HERE" || abort "Can't change back to $HERE"
+
+    if [ -f "/var/www/html/index.html" ] ; then
+	echo ""
+	echo "Remove default apache2 packages"
+	echo ""
+
+	rm -f /var/www/html/index.html || abort "Can't remove /var/www/html/index.html"
+    fi
+
+    util/remove_apache2_default_permissions.pl || abort "Could not remove the default rights from apache"
+}
+
 install_module() {
     module=$1
 
@@ -558,6 +572,8 @@ determine_platform_branch
 update_pkg_registry
 
 install_packages
+
+remove_apache_default_pages
 
 install_python_modules
 
