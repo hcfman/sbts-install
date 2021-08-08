@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# Copyright (c) 2021 Kim Hendrikse
+
 abort() {
     echo $* >&2
     echo "Aborting..."
