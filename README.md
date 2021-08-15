@@ -5,7 +5,9 @@ Installs the latest release of StalkedByTheState on one of NVIDIA Jetson Nano, N
 Before installing this you need to first install sbts-base and the reboot into readwrite mode. To reboot the sbts-base into readwrite mode do the following:
 
 cd sbts-bin
+
 sudo ./make_readwrite.sh
+
 sudo reboot
 
 If you are in readwrite mode then findmnt -n / will not have anything about overlayfs in it.
@@ -13,6 +15,7 @@ If you are in readwrite mode then findmnt -n / will not have anything about over
 At that stage you can clone this project and then run:
 
 cd sbts-install
+
 sudo ./sbts_install_stalkedbythestate.sh
 
 The whole installation will happen and then the box will restart and will be running the software.
