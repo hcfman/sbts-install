@@ -559,6 +559,9 @@ update_etc_rc() {
     cat > /etc/rc.local <<EOF
 #!/bin/bash
 
+modprobe nvgpu
+sleep 2
+
 /usr/bin/jetson_clocks --fan
 EOF
 
