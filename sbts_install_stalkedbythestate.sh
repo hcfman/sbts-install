@@ -596,7 +596,7 @@ systemctl start apache2
 # Choose just one of the below, comment out the ones that are not chosen
 su - "${SUDO_USER}" -c "${SUDO_USER_HOME}/darknet/start_sbts_yolov3_server.sh > /dev/null 2>&1 &" &
 #su - "${SUDO_USER}" -c "${SUDO_USER_HOME}/alexyab_darknet/start_sbts_yolov3_server.sh > /dev/null 2>&1 &" &
-#su - "${SUDO_USER}" -c "${SUDO_USER_HOME}/start_sbts_yolov4_server.sh > /dev/null 2>&1 &" &
+#su - "${SUDO_USER}" -c "${SUDO_USER_HOME}/alexyab_darknet/start_sbts_yolov4_server.sh > /dev/null 2>&1 &" &
 
 sleep 20
 
