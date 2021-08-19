@@ -251,7 +251,7 @@ determine_platform_branch() {
             ;;
         "Jetson-AGX")
             PLATFORM_BRANCH=sbts-jetson-xavier-agx
-            nvpmodel -m 0
+            nvpmodel -m 3
 	    jetson_clocks --fan
 	    echo "Jetson Xavier AGX detected"
             ;;
@@ -575,7 +575,7 @@ EOF
             ;;
         "Jetson-AGX")
             PLATFORM_BRANCH=sbts-jetson-xavier-agx
-            echo nvpmodel -m 0 >> /etc/rc.local
+            echo nvpmodel -m 3 >> /etc/rc.local
             ;;
         *)
             abort "Cannot determine the platform type"
