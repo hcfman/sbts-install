@@ -644,6 +644,12 @@ disable_docker_again() {
     systemctl disable docker.socket
 }
 
+disable_gui_for_nano() {
+    if [ "$PLATFORM_LABEL" == "NVIDIA Jetson Nano Developer Kit" ] ; then
+        sudo systemctl set-default multi-user.target
+    fi
+}
+
 make_readonly_and_reboot() {
     if ! "${SUDO_USER_HOME}/sbts-bin/make_readonly.sh" ; then
 	abort "Can't set the system to boot into read-only mode"
@@ -716,5 +722,7 @@ determine_partition_base
 update_etc_rc
 
 disable_docker_again
+
+disable_gui_for_nano
 
 make_readonly_and_reboot
