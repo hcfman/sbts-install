@@ -23,7 +23,7 @@ HERE=`/bin/pwd`
 sanity_check() {
     mount_point=$(findmnt -n / | awk '{print $2}')
     if ! [[ "${mount_point}" =~ /dev/sd || "${mount_point}" =~ /dev/nvme ]] ; then
-        abort "You need to run this script from a read-write mounted SSD drive"
+        abort "You need to run this script from a read-write mounted SSD drive. Please execute: cd ~/sbts-bin; sudo ./make_readwrite.sh; sudo reboot"
     fi
 }
 
