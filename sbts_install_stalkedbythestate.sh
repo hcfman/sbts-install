@@ -651,6 +651,10 @@ disable_docker_again() {
 
 disable_gui_for_nano() {
     if [ "$PLATFORM_LABEL" == "NVIDIA Jetson Nano Developer Kit" ] ; then
+        echo ""
+        echo "Turning off the GUI for the nano"
+        echo ""
+
         systemctl set-default multi-user.target
     fi
 }
