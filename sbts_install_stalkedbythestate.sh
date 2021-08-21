@@ -258,6 +258,11 @@ determine_platform_branch() {
             PLATFORM_BRANCH=sbts-jetson-xavier-agx
             nvpmodel -m 3
 	    jetson_clocks --fan
+
+            if [ -d /var/lib/nvpmodel/status ] ; then
+                echo -n 'pmode:0003 fmode:quiet' > /var/lib/nvpmodel/status
+            fi
+
 	    echo "Jetson Xavier AGX detected"
             ;;
         *)
