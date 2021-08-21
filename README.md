@@ -16,7 +16,7 @@ At that stage you can clone this project and then run:
 
 cd sbts-install
 
-sudo ./sbts_install_stalkedbythestate.sh
+sudo -H ./sbts_install_stalkedbythestate.sh
 
 The whole installation will happen and then the box will restart and will be running the software.
 
