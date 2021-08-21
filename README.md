@@ -14,7 +14,7 @@ cd sbts-install
 sudo -H ./sbts_install_stalkedbythestate.sh
 ```
 
-The whole installation will happen and then the box will restart and will be running the software.
+The whole system will be installed and reboot, after which the system will be running the software.
 
 To view the user interface type in:
 
