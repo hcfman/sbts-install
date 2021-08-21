@@ -245,8 +245,13 @@ determine_platform_branch() {
             ;;
         "NVIDIA Jetson Xavier NX Developer Kit")
             PLATFORM_BRANCH=sbts-jetson-xavier-nx
-            nvpmodel -m 2
+            nvpmodel -m 8
 	    jetson_clocks --fan
+
+            if [ -d /var/lib/nvpmodel/status ] ; then
+                echo -n 'pmode:0008 fmode:quiet' > /var/lib/nvpmodel/status
+            fi
+
 	    echo "Jetson Xavier NX detected"
             ;;
         "Jetson-AGX")
@@ -574,7 +579,7 @@ EOF
             ;;
         "NVIDIA Jetson Xavier NX Developer Kit")
             PLATFORM_BRANCH=sbts-jetson-xavier-nx
-            echo nvpmodel -m 2 >> /etc/rc.local
+            echo nvpmodel -m 8 >> /etc/rc.local
             ;;
         "Jetson-AGX")
             PLATFORM_BRANCH=sbts-jetson-xavier-agx
