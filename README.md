@@ -2,7 +2,11 @@
 
 Installs the latest release of StalkedByTheState on one of NVIDIA Jetson Nano, NX or AGX.
 
-To install, perform:
+First you need to have installed the sbts-base project from here
+
+https://github.com/hcfman/sbts-base
+
+Then do:
 
 ```
 git clone https://github.com/hcfman/sbts-install.git
