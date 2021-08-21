@@ -6,7 +6,7 @@ First you need to have installed the sbts-base project from here
 
 https://github.com/hcfman/sbts-base
 
-Then do:
+Then:
 
 ```
 git clone https://github.com/hcfman/sbts-install.git
