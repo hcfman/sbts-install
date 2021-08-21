@@ -195,7 +195,7 @@ migrate_letsencrypt() {
     echo "Migrating letsencrypt to the config partition"
     echo ""
 
-    sudo -u "$SUDO_USER" "$SUDO_USER_HOME/sbts-bin/mount_readwrite" || abort "Can't re-mount $SUDO_USER_HOME/config"
+    sudo -H -u "$SUDO_USER" "$SUDO_USER_HOME/sbts-bin/mount_readwrite" || abort "Can't re-mount $SUDO_USER_HOME/config"
 
     if [ ! -e "$SUDO_USER_HOME/config/letsencrypt" ] ; then
         mkdir "$SUDO_USER_HOME/config/letsencrypt" || abort "Can't create $SUDO_USER_HOME/config/letsencrypt"
@@ -215,7 +215,7 @@ migrate_apache2_sites-available() {
     echo "Migrating /etc/apache2/sites-available"
     echo ""
 
-    sudo -u "$SUDO_USER" "$SUDO_USER_HOME/sbts-bin/mount_readwrite" || abort "Can't re-mount $SUDO_USER_HOME/config"
+    sudo -H -u "$SUDO_USER" "$SUDO_USER_HOME/sbts-bin/mount_readwrite" || abort "Can't re-mount $SUDO_USER_HOME/config"
 
     systemctl stop apache2 || abort "Can't stop apache2"
 
@@ -295,7 +295,7 @@ install_darknet() {
     fi
 
     YOLOV3_WEIGHTS_LOCATION="https://pjreddie.com/media/files/yolov3.weights"
-    if ! sudo -u "$SUDO_USER" wget "$YOLOV3_WEIGHTS_LOCATION" ; then
+    if ! sudo -H -u "$SUDO_USER" wget "$YOLOV3_WEIGHTS_LOCATION" ; then
         cd "$SUDO_USER_HOME" && rm -rf darknet
         abort "Can't copy yolov3.weights from $YOLOV3_WEIGHTS_LOCATION"
     fi
@@ -369,7 +369,7 @@ install_alexeyab_darknet() {
     fi
 
     YOLOV4_WEIGHTS_LOCATION="https://github.com/AlexeyAB/darknet/releases/download/darknet_yolo_v3_optimal/yolov4.weights"
-    if ! sudo -u "$SUDO_USER" wget "$YOLOV4_WEIGHTS_LOCATION" ; then
+    if ! sudo -H -u "$SUDO_USER" wget "$YOLOV4_WEIGHTS_LOCATION" ; then
         cd "$SUDO_USER_HOME" && rm -rf alexyab_darknet
         abort "Can't copy yolov4.weights from $YOLOV4_WEIGHTS_LOCATION"
     fi
@@ -410,7 +410,7 @@ download_latests_app_release() {
     cd "$HERE" || abort "Can't change back to $HERE"
 
     if [ ! -f "$APP_FILE" ] ; then
-	sudo -u "$SUDO_USER" wget "$APP_URL" || abort "Can't download latest app release from $APP_URL"
+	sudo -H -u "$SUDO_USER" wget "$APP_URL" || abort "Can't download latest app release from $APP_URL"
     fi
 
     [[ -f "$APP_FILE" ]] || abort "File $APP_FILE disappeared"
@@ -453,11 +453,11 @@ unpack_app() {
     fi
 
     if [ ! -L "$SUDO_USER_HOME/app/bin/mount_readonly" ] ; then
-	sudo -u "$SUDO_USER" ln -s "$SUDO_USER_HOME/sbts-bin/mount_readonly" "$SUDO_USER_HOME/app/bin" || abort "Can't link sbts-bin/mount_readonly to app/bin"
+	sudo -H -u "$SUDO_USER" ln -s "$SUDO_USER_HOME/sbts-bin/mount_readonly" "$SUDO_USER_HOME/app/bin" || abort "Can't link sbts-bin/mount_readonly to app/bin"
     fi
 
     if [ ! -L "$SUDO_USER_HOME/app/bin/mount_readwrite" ] ; then
-	sudo -u "$SUDO_USER" ln -s "$SUDO_USER_HOME/sbts-bin/mount_readwrite" "$SUDO_USER_HOME/app/bin" || abort "Can't link sbts-bin/mount_readwrite to app/bin"
+	sudo -H -u "$SUDO_USER" ln -s "$SUDO_USER_HOME/sbts-bin/mount_readwrite" "$SUDO_USER_HOME/app/bin" || abort "Can't link sbts-bin/mount_readwrite to app/bin"
     fi
 }
 
@@ -503,10 +503,10 @@ install_secure() {
     echo ""
 
     if [ ! -d "$SUDO_USER_HOME/sbts-secure" ] ; then
-	sudo -u "$SUDO_USER" mkdir "$SUDO_USER_HOME/sbts-secure" || abort "Can't create $SUDO_USER_HOME/sbts-secure"
+	sudo -H -u "$SUDO_USER" mkdir "$SUDO_USER_HOME/sbts-secure" || abort "Can't create $SUDO_USER_HOME/sbts-secure"
     fi
 
-    if ! sudo -u "$SUDO_USER" cp -p -r resources/secure/secure.py resources/secure/start_secure.sh resources/secure/secureparse "$SUDO_USER_HOME/sbts-secure" ; then
+    if ! sudo -H -u "$SUDO_USER" cp -p -r resources/secure/secure.py resources/secure/start_secure.sh resources/secure/secureparse "$SUDO_USER_HOME/sbts-secure" ; then
 	abort "Can't install the \"secure\" program"
     fi
 
@@ -522,12 +522,12 @@ install_secure() {
 	abort "Can't chown $SUDO_USER:$SUDO_USER $SUDO_USER_HOME/config/secure/resources"
     fi
 
-    if ! sudo -u "$SUDO_USER" cp -r resources/secure/config.json "$SUDO_USER_HOME/config/secure/resources" ; then
+    if ! sudo -H -u "$SUDO_USER" cp -r resources/secure/config.json "$SUDO_USER_HOME/config/secure/resources" ; then
 	abort "Can't install config.json to $SUDO_USER_HOME/config/secure/resources"
     fi
 
     if [ ! -L "$SUDO_USER_HOME/sbts-secure/resources" ] ; then
-	if ! sudo -u "$SUDO_USER" ln -s "$SUDO_USER_HOME/config/secure/resources" "$SUDO_USER_HOME/sbts-secure/resources" ; then
+	if ! sudo -H -u "$SUDO_USER" ln -s "$SUDO_USER_HOME/config/secure/resources" "$SUDO_USER_HOME/sbts-secure/resources" ; then
 	    abort "Can't create symlink from $SUDO_USER_HOME/config/secure/resources to $SUDO_USER_HOME/sbts-secure/resources"
 	fi
     fi
