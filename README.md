@@ -4,15 +4,19 @@ Installs the latest release of StalkedByTheState on one of NVIDIA Jetson Nano, N
 
 To install, perform:
 
+```
 git clone https://github.com/hcfman/sbts-install.git
 cd sbts-install
 sudo -H ./sbts_install_stalkedbythestate.sh
+```
 
 The whole installation will happen and then the box will restart and will be running the software.
 
 To view the user interface type in:
 
-http:you-ip-address:8080/sbts/
+```
+http://your-ip-address:8080/sbts/
+```
 
 with the account details you entered when installing.
 
