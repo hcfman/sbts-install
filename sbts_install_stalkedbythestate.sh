@@ -190,6 +190,17 @@ install_apache2_modules() {
     done
 }
 
+install_extra_apache2_ssl_config() {
+    echo ""
+    echo "Installing extra apache ssl config
+    echo ""
+
+    cd "$HERE" || abort "Can't change back to $HERE"
+    
+    cp resources/sbts-ssl.conf /etc/apache2/conf-available
+    a2enconf sbts-ssl.conf
+}
+
 migrate_letsencrypt() {
     echo ""
     echo "Migrating letsencrypt to the config partition"
@@ -705,6 +716,8 @@ remove_apache_default_pages
 install_python_modules
 
 install_apache2_modules
+
+install_extra_apache2_ssl_config
 
 migrate_letsencrypt
 
