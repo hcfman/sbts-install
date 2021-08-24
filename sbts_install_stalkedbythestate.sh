@@ -192,7 +192,7 @@ install_apache2_modules() {
 
 install_extra_apache2_ssl_config() {
     echo ""
-    echo "Installing extra apache ssl config
+    echo "Installing extra apache ssl config"
     echo ""
 
     cd "$HERE" || abort "Can't change back to $HERE"
