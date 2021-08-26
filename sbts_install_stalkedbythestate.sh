@@ -442,7 +442,6 @@ download_latests_app_release() {
 unpack_app() {
     cd "$SUDO_USER_HOME" || abort "Can't change directory to $SUDO_USER_HOME"
 
-
     if [ -d "app" ] ; then
 	return
     fi
@@ -480,6 +479,24 @@ unpack_app() {
     if [ ! -L "$SUDO_USER_HOME/app/bin/mount_readwrite" ] ; then
 	sudo -H -u "$SUDO_USER" ln -s "$SUDO_USER_HOME/sbts-bin/mount_readwrite" "$SUDO_USER_HOME/app/bin" || abort "Can't link sbts-bin/mount_readwrite to app/bin"
     fi
+}
+
+create_reboot_and_shutdown() {
+    cd "$SUDO_USER_HOME" || abort "Can't change directory to $SUDO_USER_HOME"
+
+    echo ""
+    echo "Create reboot and shutdown"
+    echo ""
+
+    cd "$SUDO_USER_HOME/app/bin" || abort "Can't change to $SUDO_USER_HOME/app/bin"
+    gcc reboot.c -o reboot || abort "Can't compile reboot.c"
+    gcc shutdown.c -o shutdown || abort "Can't compile shutdown.c"
+    mv reboot shutdown /usr/local/sbts-sbin || abort "Can't move reboot and shutdown to /usr/local/sbts-sbin"
+    chown root:root "/usr/local/sbts-sbin/reboot" "/usr/local/sbts-sbin/reboot" || abort "Can't chown root:root /usr/local/sbts-sbin/reboot /usr/local/sbts-sbin/shutdown"
+    chmod +s,g+s "/usr/local/sbts-sbin/reboot" "/usr/local/sbts-sbin/reboot" || abort "Can't chmod setuid root /usr/local/sbts-sbin/reboot and /usr/local/sbts-sbin/reboot"
+    ln -s /usr/local/sbts-sbin/reboot . || abort "Can't create symlink from /usr/local/sbts-sbin/reboot to app/bin"
+    ln -s /usr/local/sbts-sbin/shutdown . || abort "Can't create symlink from /usr/local/sbts-sbin/shutdown to app/bin"
+
 }
 
 update_udev_rules() {
@@ -730,6 +747,8 @@ install_alexeyab_darknet
 download_latests_app_release
 
 unpack_app
+
+create_reboot_and_shutdown
 
 update_udev_rules
 
