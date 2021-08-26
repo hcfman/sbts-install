@@ -489,13 +489,13 @@ create_reboot_and_shutdown() {
     echo ""
 
     cd "$SUDO_USER_HOME/app/bin" || abort "Can't change to $SUDO_USER_HOME/app/bin"
-    gcc sbts_reboot.c -o reboot || abort "Can't compile sbts_reboot.c"
-    gcc sbts_shutdown.c -o shutdown || abort "Can't compile sbts_shutdown.c"
-    mv reboot shutdown /usr/local/sbts-sbin || abort "Can't move reboot and shutdown to /usr/local/sbts-sbin"
-    chown root:root "/usr/local/sbts-sbin/reboot" "/usr/local/sbts-sbin/shutdown" || abort "Can't chown root:root /usr/local/sbts-sbin/reboot /usr/local/sbts-sbin/shutdown"
-    chmod +s,g+s "/usr/local/sbts-sbin/reboot" "/usr/local/sbts-sbin/shutdown" || abort "Can't chmod setuid root /usr/local/sbts-sbin/reboot and /usr/local/sbts-sbin/reboot"
-    ln -s /usr/local/sbts-sbin/reboot . || abort "Can't create symlink from /usr/local/sbts-sbin/reboot to app/bin"
-    ln -s /usr/local/sbts-sbin/shutdown . || abort "Can't create symlink from /usr/local/sbts-sbin/shutdown to app/bin"
+    gcc sbts_reboot.c -o sbts_reboot || abort "Can't compile sbts_reboot.c"
+    gcc sbts_shutdown.c -o sbts_shutdown || abort "Can't compile sbts_shutdown.c"
+    mv sbts_reboot sbts_shutdown /usr/local/sbts-sbin || abort "Can't move sbts_reboot and sbts_shutdown to /usr/local/sbts-sbin"
+    chown root:root "/usr/local/sbts-sbin/sbts_reboot" "/usr/local/sbts-sbin/sbts_shutdown" || abort "Can't chown root:root /usr/local/sbts-sbin/sbts_reboot /usr/local/sbts-sbin/sbts_shutdown"
+    chmod +s,g+s "/usr/local/sbts-sbin/sbts_reboot" "/usr/local/sbts-sbin/sbts_shutdown" || abort "Can't chmod setuid root /usr/local/sbts-sbin/sbts_reboot and /usr/local/sbts-sbin/sbts_shutdown"
+    ln -s /usr/local/sbts-sbin/sbts_reboot . || abort "Can't create symlink from /usr/local/sbts-sbin/sbts_reboot to app/bin"
+    ln -s /usr/local/sbts-sbin/sbts_shutdown . || abort "Can't create symlink from /usr/local/sbts-sbin/sbts_shutdown to app/bin"
 
 }
 
