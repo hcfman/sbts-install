@@ -490,7 +490,7 @@ create_reboot_and_shutdown() {
 
     cd "$SUDO_USER_HOME/app/bin" || abort "Can't change to $SUDO_USER_HOME/app/bin"
     gcc sbts_reboot.c -o reboot || abort "Can't compile sbts_reboot.c"
-    gcc .sbts_shutdown.c -o shutdown || abort "Can't compile sbts_shutdown.c"
+    gcc sbts_shutdown.c -o shutdown || abort "Can't compile sbts_shutdown.c"
     mv reboot shutdown /usr/local/sbts-sbin || abort "Can't move reboot and shutdown to /usr/local/sbts-sbin"
     chown root:root "/usr/local/sbts-sbin/reboot" "/usr/local/sbts-sbin/reboot" || abort "Can't chown root:root /usr/local/sbts-sbin/reboot /usr/local/sbts-sbin/shutdown"
     chmod +s,g+s "/usr/local/sbts-sbin/reboot" "/usr/local/sbts-sbin/reboot" || abort "Can't chmod setuid root /usr/local/sbts-sbin/reboot and /usr/local/sbts-sbin/reboot"
