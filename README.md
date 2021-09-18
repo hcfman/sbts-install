@@ -2,7 +2,7 @@
 
 Installs the latest release of StalkedByTheState on one of NVIDIA Jetson Nano, NX or AGX.
 
-If you have a Jetson Nano, then you should disable the GUI interface with:
+If you have a Jetson Nano, then you should disable the GUI interface first with:
 
 ```
 sudo systemctl set-default multi-user.target; sudo reboot
