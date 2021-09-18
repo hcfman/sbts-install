@@ -4,9 +4,9 @@ Installs the latest release of StalkedByTheState on one of NVIDIA Jetson Nano, N
 
 If you have a Jetson Nano, then you should disable the GUI interface with:
 
-...
+```
 sudo systemctl set-default multi-user.target; sudo reboot
-...
+```
 
 First you need to have installed the sbts-base project from here
 
