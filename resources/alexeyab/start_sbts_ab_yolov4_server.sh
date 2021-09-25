@@ -12,6 +12,6 @@ HERE=$(dirname $0)
 cd $HERE || abort "Can't change to script directory"
 
 while [ 1 ] ; do
-    ./sbts-yolov4-server.py
+    ./sbts-ab-yolov4-server.py -b 127.0.0.1 -p 8766
     sleep 5
 done

@@ -173,7 +173,7 @@ install_python_modules() {
 
     module=$1
 
-    for m in flask requests websockets shapely configparser ; do
+    for m in flask requests websockets shapely configparser asyncio aiohttp; do
         install_module "$m"
     done
 }
