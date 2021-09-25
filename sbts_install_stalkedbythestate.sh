@@ -310,7 +310,7 @@ install_darknet() {
         abort "Can't make darknet properly, $SUDO_USER_HOME/darknet/libdarknet.so does not exist"
     fi
 
-    if ! su "$SUDO_USER" -c "chmod +x python/sbts*.py start_sbts_yolov3_server.sh" ; then
+    if ! su "$SUDO_USER" -c "chmod +x sbts*.py start_sbts_pj_yolov3_server.sh" ; then
         cd "$SUDO_USER_HOME" && rm -rf darknet
         abort "Can't set executable python and shell scripts in $SUDO_USER_HOME/darknet"
     fi
@@ -379,7 +379,7 @@ install_alexeyab_darknet() {
         abort "Can't copy sbts yolo server python files to AlexeyAB directory"
     fi
 
-    if ! su "$SUDO_USER" -c "chmod +x sbts*.py start_sbts_yolov3_server.sh start_sbts_yolov4_server.sh" ; then
+    if ! su "$SUDO_USER" -c "chmod +x sbts*.py start_sbts_ab_yolov3_server.sh start_sbts_ab_yolov4_server.sh" ; then
         cd "$SUDO_USER_HOME" && rm -rf alexyab_darknet
         abort "Can't set executable python and shell scripts in $SUDO_USER_HOME/alexyab_darknet"
     fi
