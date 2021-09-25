@@ -532,7 +532,7 @@ move_disk_to_disk_partition() {
 install_secure() {
     cd "$HERE" || abort "Can't change back to $HERE"
 
-    if [ -f "$SUDO_USER_HOME/sbts-secure/config.json" -a -f "$SUDO_USER_HOME/sbts-secure/secure.py" -a -f "$SUDO_USER_HOME/sbts-secure/start_secure.sh" -a -f "" -a -d "$SUDO_USER_HOME/sbts-secure/secureparse" -a -d "$SUDO_USER_HOME/config/secure/resources" ] ; then
+    if [ -f "$SUDO_USER_HOME/sbts-secure/config.json" -a -f "$SUDO_USER_HOME/sbts-secure/multi-secure.py" -a -f "$SUDO_USER_HOME/sbts-secure/start_secure.sh" -a -f "" -a -d "$SUDO_USER_HOME/sbts-secure/multi_secureparse" -a -d "$SUDO_USER_HOME/config/secure/resources" ] ; then
 	return
     fi
 
@@ -544,7 +544,7 @@ install_secure() {
 	sudo -H -u "$SUDO_USER" mkdir "$SUDO_USER_HOME/sbts-secure" || abort "Can't create $SUDO_USER_HOME/sbts-secure"
     fi
 
-    if ! sudo -H -u "$SUDO_USER" cp -p -r resources/secure/secure.py resources/secure/start_secure.sh resources/secure/secureparse "$SUDO_USER_HOME/sbts-secure" ; then
+    if ! sudo -H -u "$SUDO_USER" cp -p -r resources/secure/multi-secure.py resources/secure/start_secure.sh resources/secure/multi_secureparse "$SUDO_USER_HOME/sbts-secure" ; then
 	abort "Can't install the \"secure\" program"
     fi
 
