@@ -635,9 +635,36 @@ mount ${partition_base_path}3 ${SUDO_USER_HOME}/disk
 systemctl start apache2
 
 # Choose just one of the below, comment out the ones that are not chosen
-su - "${SUDO_USER}" -c "${SUDO_USER_HOME}/darknet/start_sbts_yolov3_server.sh > /dev/null 2>&1 &" &
-#su - "${SUDO_USER}" -c "${SUDO_USER_HOME}/alexyab_darknet/start_sbts_yolov3_server.sh > /dev/null 2>&1 &" &
-#su - "${SUDO_USER}" -c "${SUDO_USER_HOME}/alexyab_darknet/start_sbts_yolov4_server.sh > /dev/null 2>&1 &" &
+EOF
+
+    case "$PLATFORM_LABEL" in
+        "NVIDIA Jetson Nano Developer Kit")
+            cat >> /etc/rc.local <<EOF
+#su - "${SUDO_USER}" -c "${SUDO_USER_HOME}/darknet/start_sbts_pj_yolov3_server.sh > /dev/null 2>&1 &" &
+#su - "${SUDO_USER}" -c "${SUDO_USER_HOME}/alexyab_darknet/start_sbts_ab_yolov3_server.sh > /dev/null 2>&1 &" &
+su - "${SUDO_USER}" -c "${SUDO_USER_HOME}/alexyab_darknet/start_sbts_ab_yolov4_server.sh > /dev/null 2>&1 &" &
+EOF
+            ;;
+        "NVIDIA Jetson Xavier NX Developer Kit")
+            cat >> /etc/rc.local <<EOF
+su - "${SUDO_USER}" -c "${SUDO_USER_HOME}/darknet/start_sbts_pj_yolov3_server.sh > /dev/null 2>&1 &" &
+#su - "${SUDO_USER}" -c "${SUDO_USER_HOME}/alexyab_darknet/start_sbts_ab_yolov3_server.sh > /dev/null 2>&1 &" &
+su - "${SUDO_USER}" -c "${SUDO_USER_HOME}/alexyab_darknet/start_sbts_ab_yolov4_server.sh > /dev/null 2>&1 &" &
+EOF
+            ;;
+        "Jetson-AGX")
+            cat >> /etc/rc.local <<EOF
+su - "${SUDO_USER}" -c "${SUDO_USER_HOME}/darknet/start_sbts_pj_yolov3_server.sh > /dev/null 2>&1 &" &
+#su - "${SUDO_USER}" -c "${SUDO_USER_HOME}/alexyab_darknet/start_sbts_ab_yolov3_server.sh > /dev/null 2>&1 &" &
+su - "${SUDO_USER}" -c "${SUDO_USER_HOME}/alexyab_darknet/start_sbts_ab_yolov4_server.sh > /dev/null 2>&1 &" &
+EOF
+            ;;
+        *)
+            abort "Cannot determine the platform type"
+            ;;
+    esac
+
+    cat >> /etc/rc.local <<EOF
 
 sleep 20
 
