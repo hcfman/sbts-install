@@ -668,12 +668,12 @@ EOF
 
 sleep 20
 
-#su - "${SUDO_USER}" -c "${SUDO_USER_HOME}/sbts-secure/vlc_front.sh > /dev/null 2>&1 &' &
-#su - "${SUDO_USER}" -c "${SUDO_USER_HOME}/sbts-secure/vlc_back.sh > /dev/null 2>&1 &' &
+#su - "${SUDO_USER}" -c "${SUDO_USER_HOME}/sbts-secure/vlc_front.sh > /dev/null 2>&1 &" &
+#su - "${SUDO_USER}" -c "${SUDO_USER_HOME}/sbts-secure/vlc_back.sh > /dev/null 2>&1 &" &
 
-su - "${SUDO_USER}" -c "${SUDO_USER_HOME}/app/bin/start.sh" > /dev/null 2>&1 &
+su - "${SUDO_USER}" -c "${SUDO_USER_HOME}/app/bin/start.sh > /dev/null 2>&1 &" &
 
-su - "${SUDO_USER}" -c "${SUDO_USER_HOME}/sbts-secure/start_secure.sh" > /dev/null 2>&1 &
+su - "${SUDO_USER}" -c "${SUDO_USER_HOME}/sbts-secure/start_secure.sh > /dev/null 2>&1 &" &
 
 exit 0
 EOF
