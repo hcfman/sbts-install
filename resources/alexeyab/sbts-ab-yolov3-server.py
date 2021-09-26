@@ -1,7 +1,5 @@
 #!/usr/bin/python3
 
-# Copyright (c) 2021 Kim Hendrikse
-
 import sys
 import asyncio
 import json
