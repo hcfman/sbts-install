@@ -203,9 +203,6 @@ class CameraReader(Thread):
     def getNotifyList(self) -> 'list:Notify':
         return self.notifyList
 
-    def getCategoryNotificationListMap(self):
-        return self.categoryNotificationListMap
-
     def getLastImage(self):
         self.lock.acquire()
         try:
@@ -216,9 +213,6 @@ class CameraReader(Thread):
             self.lock.release()
 
         return returnImage
-
-    def categoryMap(self):
-        return self.categoryMap
 
     def connect(self):
         while True:
