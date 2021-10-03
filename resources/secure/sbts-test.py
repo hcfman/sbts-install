@@ -9,6 +9,7 @@ import asyncio
 import json
 import sys
 import os
+import time
 
 import argparse
 
@@ -118,6 +119,7 @@ def drawTarget(category, prob, x, y, w, h, frame):
     cv2.imshow("image", frame)
     cv2.waitKey(1)
 
+
 async def processResult(frame, resultCache, image, returnResult:ReturnResult, camera:CameraReader):
     returnResult.setAdvanceSkip(False)
     for notify in camera.getNotifyList():
@@ -140,6 +142,8 @@ async def processResult(frame, resultCache, image, returnResult:ReturnResult, ca
                 break
 
 async def checkIncluded(frame, image, include, resultCache, returnResult:ReturnResult):
+    global neverDrawn;
+
     for modelList in include.getModels():
         triggerCount = 0
         skipping = False
@@ -150,6 +154,7 @@ async def checkIncluded(frame, image, include, resultCache, returnResult:ReturnR
             minCount = model.getCounter()
 
             for item in result:
+                neverDrawn = False
                 prob = item[1]
                 x, y, w, h = item[2][0], item[2][1], item[2][2], item[2][3]
                 drawTarget(model.getCategory(), prob, int(x), int(y), int(w), int(h), frame)
@@ -246,6 +251,7 @@ def drawRegions(frame, camera):
         cv2.imshow("image", frame)
         cv2.waitKey(1)
 
+
 @asyncio.coroutine
 def secureRunner():
     # Read the configuration json file
@@ -277,6 +283,8 @@ def secureRunner():
                 drawRegions(frame, camera)
 
                 yield from processResult(frame, resultCache, image, returnResult, camera)
+                cv2.imshow("image", frame)
+                cv2.waitKey(100)
 
                 if not skipped and returnResult.getAdvanceSkip():
                     skipped = True
