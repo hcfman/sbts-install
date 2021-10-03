@@ -544,7 +544,7 @@ install_secure() {
 	sudo -H -u "$SUDO_USER" mkdir "$SUDO_USER_HOME/sbts-secure" || abort "Can't create $SUDO_USER_HOME/sbts-secure"
     fi
 
-    if ! sudo -H -u "$SUDO_USER" cp -p -r resources/secure/sbts-secure.py resources/secure/start_secure.sh resources/secure/multi_secureparse resources/secure/sbts-draw.py "$SUDO_USER_HOME/sbts-secure" ; then
+    if ! sudo -H -u "$SUDO_USER" cp -p -r resources/secure/sbts-secure.py resources/secure/sbts-test.py resources/secure/start_secure.sh resources/secure/multi_secureparse resources/secure/sbts-draw.py "$SUDO_USER_HOME/sbts-secure" ; then
 	abort "Can't install the \"secure\" program"
     fi
 

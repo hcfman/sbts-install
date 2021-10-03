@@ -2,8 +2,10 @@
 
 # Copyright, 2021, Kim Hendrikse
 
+import cv2
+import numpy as np
+
 import asyncio
-from aiohttp import web
 import json
 import sys
 import os
@@ -87,101 +89,50 @@ class ReturnResult():
     def getAdvanceSkip(self):
         return self.advanceSkip
 
-async def changeCameraState(request):
-    cam = request.match_info.get('cam', "")
-    op = request.match_info.get('op', "")
+def convertBack(x, y, w, h):
+    xmin = int(round(x - (w / 2)))
+    xmax = int(round(x + (w / 2)))
+    ymin = int(round(y - (h / 2)))
+    ymax = int(round(y + (h / 2)))
+    return xmin, ymin, xmax, ymax
 
-    if not cam in cameraMap.keys() or (op != "enable" and op != "disable"):
-        return web.Response(text="Nok")
+def drawTargetCross(x, y, frame, isIncluded, IsExcluded):
+    if isIncluded:
+        cv2.putText(frame, "x", (int(x), int(y)),
+                    cv2.FONT_HERSHEY_SIMPLEX, 1.0, [255, 0, 0], 2)
 
-    if op == "enable":
-        cameraMap[cam].enable()
-    elif op == "disable":
-        cameraMap[cam].disable()
+    if IsExcluded:
+        cv2.putText(frame, "x", (int(x), int(y)),
+                    cv2.FONT_HERSHEY_SIMPLEX, 1.0, [0, 0, 255], 2)
 
-    return web.Response(text="Ok")
+    cv2.imshow("image", frame)
+    cv2.waitKey(1)
 
-async def reportnotifyState(request):
-    notifyEnabledMap = {}
-    for cam in cameraMap.keys():
-        notifyEnabledMap[cam] = {}
-        notifyEnabledMap[cam]['enabled'] = cameraMap[cam].isEnabled()
-        notifyEnabledMap[cam]['notifications'] = {}
-        for notify in cameraMap[cam].getNotifyList():
-            notifyEnabledMap[cam]['notifications'][notify.getName()] = notify.isEnabled()
+def drawTarget(category, prob, x, y, w, h, frame):
+    xmin, ymin, xmax, ymax = convertBack(float(x), float(y), float(w), float(h))
+    pt1 = (xmin, ymin)
+    pt2 = (xmax, ymax)
+    cv2.rectangle(frame, pt1, pt2, (0, 255, 0), 1)
+    cv2.putText(frame, "{0} {1:.2f}".format(category, prob), (pt1[0], pt1[1] + 10),
+                cv2.FONT_HERSHEY_SIMPLEX, 0.5, [0, 255, 0], 1)
 
-    return web.Response(text=json.dumps(notifyEnabledMap, indent=2), headers={'Content-Type': 'text/json'})
+    cv2.imshow("image", frame)
+    cv2.waitKey(1)
 
-async def changeNotifyState(request):
-    cam = request.match_info.get('cam', "")
-    notification = request.match_info.get('notification', "")
-    op = request.match_info.get('op', "")
-
-    if not cam in cameraMap.keys() or not notification in [notify.getName() for notify in cameraMap[cam].getNotifyList()] \
-            or (op != "enable" and op != "disable" and op != "enabled"):
-        return web.Response(text="Nok")
-
-    if op == "enable":
-        for mapCam in cameraMap[cam].getNotifyList():
-            if mapCam.getName() == notification:
-                mapCam.enable()
-                print("Enable notification {}/{}".format(cam, notification))
-                break
-    elif op == "disable":
-        for mapCam in cameraMap[cam].getNotifyList():
-            if mapCam.getName() == notification:
-                mapCam.disable()
-                print("Disable notification {}/{}".format(cam, notification))
-                break
-
-    return web.Response(text="Ok")
-
-
-async def webServer():
-
-    app = web.Application()
-    # app.router.add_get('/', handle)
-    app.router.add_get('/enabled', reportnotifyState)
-    app.router.add_get('/notify/{op}/{cam}/{notification}', changeNotifyState)
-    app.router.add_get('/cam/{op}/{cam}', changeCameraState)
-    runner = web.AppRunner(app)
-    await runner.setup()
-
-    site = web.TCPSite(runner, server_bind_address, server_port)
-    await site.start()
-
-def fireNotification(notify:Notify):
-    if debug:
-        print("    Fired: {}".format(notify.getName()))
-    try:
-        if notify.getMethod() == "POST":
-            requests.post(notify.getUrl(), auth=(notify.getUsername(), notify.getPassword()), data=notify.getParams())
-        else:
-            requests.get(notify.getUrl(), auth=(notify.getUsername(), notify.getPassword()), data=notify.getParams())
-    except Exception as e:
-        print("Caught firing notification: {0}, err: {1}".format(type(e).__name__, str(e)))
-
-async def processResult(resultCache, image, returnResult:ReturnResult, camera:CameraReader):
+async def processResult(frame, resultCache, image, returnResult:ReturnResult, camera:CameraReader):
     returnResult.setAdvanceSkip(False)
     for notify in camera.getNotifyList():
         returnResult.setTriggered(False)
 
-        # Dynamic disable/enable from notifications via rest interface
-        # can save process seldom used models
-        if not notify.isEnabled():
-            continue
-
         for zone in notify.getZoneList():
             excluded = False
-            if debug:
-                print("  Zone: {}".format(zone.getName()))
-            excluded = await checkExcluded(excluded, image, resultCache, zone)
+            excluded = await checkExcluded(frame, excluded, image, resultCache, zone)
 
             if excluded:
                 break
 
             for include in zone.getIncludeList():
-                await checkIncluded(image, include, resultCache, returnResult)
+                await checkIncluded(frame, image, include, resultCache, returnResult)
 
                 if returnResult.getTriggered():
                     break
@@ -189,16 +140,11 @@ async def processResult(resultCache, image, returnResult:ReturnResult, camera:Ca
             if returnResult.getTriggered():
                 break
 
-        if returnResult.getTriggered():
-            fireNotification(notify)
-
-async def checkIncluded(image, include, resultCache, returnResult:ReturnResult):
+async def checkIncluded(frame, image, include, resultCache, returnResult:ReturnResult):
     for modelList in include.getModels():
         triggerCount = 0
         skipping = False
         for model in modelList:
-            if debug:
-                print("    Checking include: {0}, model {1}:{2}".format(include.getName(), model.getName(), model.getCategory()))
             result = await resultCache.getResult(model.getName(), model.getCategory(), image)
 
             count = 0
@@ -207,27 +153,22 @@ async def checkIncluded(image, include, resultCache, returnResult:ReturnResult):
             for item in result:
                 prob = item[1]
                 x, y, w, h = item[2][0], item[2][1], item[2][2], item[2][3]
+                drawTarget(model.getCategory(), prob, int(x), int(y), int(w), int(h), frame)
                 if (model.isContained(prob, int(x), int(y), int(w), int(h))):
-                    if debug:
-                        print("      {}: matched".format(item))
                     count += 1
-                else:
-                    if debug:
-                        print("      {}".format(item))
 
             if count < minCount:
                 # minCount is not reached, not enough hits in the current image for this model
                 break
 
             # At this point, there was a hit for this model
+            drawTargetCross(int(x), int(y), frame, True, False)
             triggerCount += 1
 
             if model.getAdvanceSkip():
                 skipping = True
 
         if len(modelList) > 0 and triggerCount == len(modelList):
-            if debug:
-                print("    Triggered")
             # Now all of the models in the inner model list had a valid hit
             returnResult.setTriggered(True)
 
@@ -236,28 +177,27 @@ async def checkIncluded(image, include, resultCache, returnResult:ReturnResult):
                 returnResult.setAdvanceSkip(True)
             break
 
-async def checkExcluded(excluded, image, resultCache, zone):
+async def checkExcluded(frame, excluded, image, resultCache, zone):
     for excludeRegion in zone.getExcludeList():
         modelsListList = excludeRegion.getModels()
         for modelList in modelsListList:
-            triggerCount = await checkExcludedInnerModelList(image, modelList, resultCache)
+            triggerCount = await checkExcludedInnerModelList(frame, image, modelList, resultCache)
 
             if len(modelList) > 0 and triggerCount == len(modelList):
                 excluded = True
                 break
     return excluded
 
-async def checkExcludedInnerModelList(image, modelList, resultCache):
+async def checkExcludedInnerModelList(frame, image, modelList, resultCache):
     triggerCount = 0
     for model in modelList:
-        if debug:
-            print("    Checking exclude: model {0}:{1}".format(model.getName(), model.getCategory()))
         result = await resultCache.getResult(model.getName(), model.getCategory(), image)
 
         count = 0
         for item in result:
             prob = item[1]
             x, y, w, h = item[2][0], item[2][1], item[2][2], item[2][3]
+            drawTarget(model.getCategory(), prob, int(x), int(y), int(w), int(h), frame)
             if (model.isContained(prob, int(x), int(y), int(w), int(h))):
                 count += 1
 
@@ -266,6 +206,7 @@ async def checkExcludedInnerModelList(image, modelList, resultCache):
             break
 
         # At this point, there was a hit for this model
+        drawTargetCross(int(x), int(y), frame, False, True)
         triggerCount += 1
     return triggerCount
 
@@ -278,9 +219,33 @@ def readConfigFile():
         modelMap = ModelMap.from_json(configJson["modelList"])
         cameras = []
         for camera in configJson["cameraList"]:
-            cameras.append(CameraReader.from_json(camera))
+            if camera["name"] == args.cameraName:
+                cameraReader = CameraReader.from_json(camera)
+                cameraReader.enable()
+                cameras.append(cameraReader)
 
         return SecureConfig(modelMap.getModelsMap(), cameras)
+
+def drawRegions(frame, camera):
+    global neverDrawn
+
+    for notify in camera.getNotifyList():
+        for zone in notify.getZoneList():
+            for include in zone.getIncludeList():
+                for modelList in include.getModels():
+                    for model in modelList:
+                        pts = np.array(model.getPolygon().getPointList(), np.int32)
+                        cv2.polylines(frame, [pts], True, (0, 255, 255))
+
+            for exclude in zone.getExcludeList():
+                for modelList in exclude.getModels():
+                    for model in modelList:
+                        pts = np.array(model.getPolygon().getPointList(), np.int32)
+                        cv2.polylines(frame, [pts], True, (0, 0, 255))
+
+    if neverDrawn:
+        cv2.imshow("image", frame)
+        cv2.waitKey(1)
 
 @asyncio.coroutine
 def secureRunner():
@@ -304,15 +269,15 @@ def secureRunner():
 
         lastImage = camera.getLastImage()
         if camera.isEnabled() and lastImage is not None:
-            if debug:
-                print("Process camera: {}".format(camera.getName()))
             resultCache = ResultCache(wsMap)
 
             try:
                 skipCount = 0
                 image = lastImage.getImage()
+                frame = cv2.imdecode(np.fromstring(lastImage.getImage(), dtype=np.uint8), cv2.IMREAD_COLOR)
+                drawRegions(frame, camera)
 
-                yield from processResult(resultCache, image, returnResult, camera)
+                yield from processResult(frame, resultCache, image, returnResult, camera)
 
                 if not skipped and returnResult.getAdvanceSkip():
                     skipped = True
@@ -331,20 +296,12 @@ def secureRunner():
             skipCount = 0
             yield from asyncio.sleep(0.005)
 
-        if debug:
-            print("")
-
-
 def startCamerasAndInitReturnResult(secureConfig):
     returnResultMap = {}
     cameras = secureConfig.getCameras()
     for camera in cameras:
-        if debug:
-            print("Reader url = {0}".format(camera.getUrl()))
         camera.start()
         returnResultMap[camera.getName()] = ReturnResult()
-        if debug:
-            print("Joined")
         cameraMap[camera.getName()] = camera
     return cameras, returnResultMap
 
@@ -368,31 +325,19 @@ def initialize(configFilename, readers):
             readers.append(CameraReader.from_json(camera))
 
 parser = argparse.ArgumentParser()
-parser.add_argument("-b", "--bind", dest="bind_address", help="Bind address for the control server")
-parser.add_argument("-p", "--port", dest="server_port", help="Port for the control server")
-parser.add_argument("-d", "--debug", action="store_true", help="Enable debug output")
 parser.add_argument("configFile", help="Path to config file")
+parser.add_argument("cameraName", help="Camera name")
+parser.add_argument("streamUrl", help="Stream URL")
 args = parser.parse_args()
 
-if args.bind_address == None or args.server_port == None:
-    print("You must supply both a server bind host address and port")
-    sys.exit(1)
-
-server_bind_address = args.bind_address
-server_port = args.server_port
-
 if args.configFile is None:
-    print("Usage: {0} [-d] -b bind address -p port config-json-file".format(sys.argv[0]))
+    print("Usage: {0} -u ws_uri config-json-file".format(sys.argv[0]))
     sys.exit(1)
-
-debug = args.debug
 
 cameraMap = {}
-asyncio.get_event_loop().run_until_complete(webServer())
+neverDrawn = True
+
 asyncio.get_event_loop().run_until_complete(secureRunner())
 asyncio.get_event_loop().run_forever()
-
-if debug:
-    print("Exiting...")
 
 os._exit(1)
