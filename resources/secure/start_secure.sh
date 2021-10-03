@@ -12,7 +12,7 @@ HERE=$(dirname $0)
 cd "$HERE" || abort "Can't change to script directory"
 
 while [ 1 ] ; do
-    ./multi-secure.py -b 127.0.0.1 -p 8764 resources/config.json
+    ./sbts-secure.py -b 127.0.0.1 -p 8764 resources/config.json
     sleep 1
 done
 
