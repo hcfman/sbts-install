@@ -115,6 +115,7 @@ update_pkg_registry() {
         echo Updating the package registry
         echo ""
         apt update
+        apt upgrade -y
         UPDATED=1
     fi
 }
