@@ -2,20 +2,34 @@
 
 # Copyright, 2021, Kim Hendrikse
 
-import cv2
-import numpy as np
-
+import argparse
 import asyncio
 import json
-import sys
 import os
 import re
+import sys
+from os import listdir
+from os.path import isfile, join
 
-import argparse
-
+import cv2
+import numpy as np
 import websockets
 
-from multi_secureparse.model import SecureConfig, CameraReader, Notify, ModelMap
+from multi_secureparse.model import SecureConfig, CameraReader, ModelMap
+
+class FrameMap():
+    def __init__(self, image):
+        self.theMap = {}
+        self.image = image
+
+    def getFrame(self, modelName):
+        if not modelName in self.theMap:
+            self.theMap[modelName] = cv2.imdecode(np.fromstring(self.image, dtype=np.uint8), cv2.IMREAD_COLOR)
+
+        return self.theMap[modelName]
+
+    def getFrameMap(self):
+        return self.theMap
 
 class ResultCache():
     def __init__(self, wsMap):
@@ -72,23 +86,6 @@ class ResultCache():
     def getFired(self):
         return self.fired
 
-class ReturnResult():
-    def __init__(self):
-        self.triggered = False
-        self.advanceSkip = False
-
-    def setTriggered(self, triggered):
-        self.triggered = triggered
-
-    def setAdvanceSkip(self, advanceSkip):
-        self.advanceSkip = advanceSkip
-
-    def getTriggered(self):
-        return self.triggered
-
-    def getAdvanceSkip(self):
-        return self.advanceSkip
-
 def convertBack(x, y, w, h):
     xmin = int(round(x - (w / 2)))
     xmax = int(round(x + (w / 2)))
@@ -104,18 +101,24 @@ def drawTargetCross(x, y, frame, included:bool):
         cv2.putText(frame, "x", (int(x), int(y)),
                     cv2.FONT_HERSHEY_SIMPLEX, 1.0, [0, 0, 255], 2)
 
-def drawTarget(category, prob, x, y, w, h, frame):
+def drawTarget(model, prob, x, y, w, h, frameMap):
     xmin, ymin, xmax, ymax = convertBack(float(x), float(y), float(w), float(h))
     pt1 = (xmin, ymin)
     pt2 = (xmax, ymax)
-    cv2.rectangle(frame, pt1, pt2, (0, 255, 0), 1)
-    cv2.putText(frame, "{0} {1:.2f}".format(category, prob), (pt1[0], pt1[1] + 10),
+    cv2.rectangle(frameMap.getFrame(model.getName()), pt1, pt2, (0, 255, 0), 1)
+    cv2.putText(frameMap.getFrame(model.getName()), "{0} {1:.2f}".format(model.getCategory(), prob), (pt1[0], pt1[1] + 10),
                 cv2.FONT_HERSHEY_SIMPLEX, 0.5, [0, 255, 0], 1)
 
-    # cv2.imshow("image", frame)
-    # cv2.waitKey(1)
+async def processResult(frameMap, resultCache, image, camera:CameraReader):
+    for notify in camera.getNotifyList():
+        for zone in notify.getZoneList():
+            for include in zone.getIncludeList():
+                await checkIncluded(frameMap, image, include, resultCache, True)
 
-async def checkIncluded(frame, image, include, resultCache, included:bool):
+            for include in zone.getExcludeList():
+                await checkIncluded(frameMap, image, include, resultCache, False)
+
+async def checkIncluded(frameMap, image, include, resultCache, included:bool):
     global neverDrawn;
 
     for modelList in include.getModels():
@@ -128,23 +131,13 @@ async def checkIncluded(frame, image, include, resultCache, included:bool):
                 neverDrawn = False
                 prob = item[1]
                 x, y, w, h = item[2][0], item[2][1], item[2][2], item[2][3]
-                drawTarget(model.getCategory(), prob, int(x), int(y), int(w), int(h), frame)
+                drawTarget(model, prob, int(x), int(y), int(w), int(h), frameMap)
                 if (model.isContained(prob, int(x), int(y), int(w), int(h))):
                     count += 1
 
                     if count > 0:
-                        drawTargetCross(int(x), int(y), frame, included)
+                        drawTargetCross(int(x), int(y), frameMap.getFrame(model.getName()), included)
                         triggerCount += 1
-
-
-async def processResult(frame, resultCache, image, camera:CameraReader):
-    for notify in camera.getNotifyList():
-        for zone in notify.getZoneList():
-            for include in zone.getIncludeList():
-                await checkIncluded(frame, image, include, resultCache, True)
-
-            for include in zone.getExcludeList():
-                await checkIncluded(frame, image, include, resultCache, False)
 
 def readConfigFile():
     global parser
@@ -173,7 +166,7 @@ def readConfigFile():
 
         return SecureConfig(modelsMap, cameras)
 
-def drawRegions(frame, camera):
+def drawRegions(frameMap, camera):
     global neverDrawn
 
     for notify in camera.getNotifyList():
@@ -182,73 +175,22 @@ def drawRegions(frame, camera):
                 for modelList in include.getModels():
                     for model in modelList:
                         pts = np.array(model.getPolygon().getPointList(), np.int32)
-                        cv2.polylines(frame, [pts], True, (0, 255, 255))
+                        cv2.polylines(frameMap.getFrame(model.getName()), [pts], True, (0, 255, 255))
 
             for exclude in zone.getExcludeList():
                 for modelList in exclude.getModels():
                     for model in modelList:
                         pts = np.array(model.getPolygon().getPointList(), np.int32)
-                        cv2.polylines(frame, [pts], True, (0, 0, 255))
+                        cv2.polylines(frameMap.getFrame(model.getName()), [pts], True, (0, 0, 255))
 
-    if neverDrawn:
-        cv2.imshow("image", frame)
-        cv2.waitKey(1)
-        neverDrawn = False
-
-
-@asyncio.coroutine
-def secureTester():
-    # Read the configuration json file
-    secureConfig = readConfigFile()
-
-    # Start the camera reader threads and initialise the return result
-    cameras, returnResultMap = startCamerasAndInitReturnResult(secureConfig)
-
-    # Create websocket connections for the models
-    wsMap = yield from initWebsocketMap(secureConfig)
-
-    cameraCount = len(cameras)
-    cameraIndex = 0
-    skipped = False
-    skipCount = 0
-
-    while True:
-        camera = cameras[cameraIndex]
-
-        lastImage = camera.getLastImage()
-        if camera.isEnabled() and lastImage is not None:
-            resultCache = ResultCache(wsMap)
-
-            try:
-                skipCount = 0
-                image = lastImage.getImage()
-                frame = cv2.imdecode(np.fromstring(lastImage.getImage(), dtype=np.uint8), cv2.IMREAD_COLOR)
-                drawRegions(frame, camera)
-
-                yield from processResult(frame, resultCache, image, camera)
-                cv2.imshow("image", frame)
-                cv2.waitKey(100)
-
-            except Exception as e:
-                print("Caught exception: {0}", type(e))
-                os._exit(1)
-        else:
-            skipCount += 1
-            cameraIndex = (cameraIndex + 1) % cameraCount
-
-        if skipCount == cameraCount:
-            skipCount = 0
-            yield from asyncio.sleep(0.005)
-
-def startCamerasAndInitReturnResult(secureConfig):
-    returnResultMap = {}
-    cameras = secureConfig.getCameras()
-    for camera in cameras:
-        camera.start()
-        returnResultMap[camera.getName()] = ReturnResult()
-        cameraMap[camera.getName()] = camera
-    return cameras, returnResultMap
-
+def getFileList():
+    fileList = []
+    mypath = args.directory + os.path.sep
+    for filename in sorted(listdir(args.directory)):
+        fullPath = join(mypath, filename)
+        if isfile(fullPath) and filename.endswith(".jpg") and not "_ano_" in filename:
+            fileList.append(fullPath)
+    return fileList
 
 def initWebsocketMap(secureConfig):
     wsMap = {}
@@ -260,6 +202,46 @@ def initWebsocketMap(secureConfig):
         wsMap[modelName] = ws
     return wsMap
 
+@asyncio.coroutine
+def annotator():
+    # Read the configuration json file
+    secureConfig = readConfigFile()
+
+    camera = None
+    for cam in secureConfig.getCameras():
+        if cam.getName() == args.cameraName:
+            camera = cam
+            break
+
+    if camera is None:
+        print("Can't find camera \"\" in the configuration file".format(args.cameraName))
+        sys.exit(1)
+
+    # Create websocket connections for the models
+    wsMap = yield from initWebsocketMap(secureConfig)
+
+    for filename in getFileList():
+        print("{0}".format(filename))
+        with open(filename, "rb") as infile:
+            jpg = infile.read()
+
+            try:
+                frameMap = FrameMap(jpg)
+                resultCache = ResultCache(wsMap)
+                drawRegions(frameMap, camera)
+
+                yield from processResult(frameMap, resultCache, jpg, camera)
+
+                for item in frameMap.getFrameMap().items():
+                    newImageName = filename.replace(".jpg", "_" + "ano_" + item[0] + ".jpg")
+                    print("=> {}".format(newImageName))
+                    cv2.imwrite(newImageName, item[1])
+
+            except Exception as e:
+                print("Caught exception: {0}", type(e))
+                os._exit(1)
+
+    sys.exit(0)
 
 def initialize(configFilename, readers):
     with open(configFilename) as infile:
@@ -272,17 +254,16 @@ parser = argparse.ArgumentParser()
 parser.add_argument("-m", "--model-list", dest="model_list", help="List of models and their websocket urls")
 parser.add_argument("configFile", help="Path to config file")
 parser.add_argument("cameraName", help="Camera name")
-parser.add_argument("streamUrl", help="Stream URL")
+parser.add_argument("directory", help="Directory")
 args = parser.parse_args()
 
 if args.configFile is None:
-    print("Usage: {0} config-json-file Camera-name Stream-Url".format(sys.argv[0]))
+    print("Usage: {0} config-json-file Camera-name Directory".format(sys.argv[0]))
     sys.exit(1)
 
-cameraMap = {}
 neverDrawn = True
 
-asyncio.get_event_loop().run_until_complete(secureTester())
+asyncio.get_event_loop().run_until_complete(annotator())
 asyncio.get_event_loop().run_forever()
 
 os._exit(1)
