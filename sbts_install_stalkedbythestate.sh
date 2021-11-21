@@ -171,9 +171,7 @@ install_python_modules() {
     echo "Installing python modules"
     echo ""
 
-    pip3 install -U setuptools
-
-    for m in flask requests websockets shapely configparser asyncio aiohttp; do
+    for m in flask requests websockets shapely configparser asyncio multidict yarl aiohttp; do
         install_module "$m"
     done
 }
