@@ -75,7 +75,7 @@ def decorate(frame, reader):
                 for modelList in excluded.getModels():
                     for model in modelList:
                         pts = np.array(model.getPolygon().getPointList(), np.int32)
-                        cv2.polylines(frame, [pts], True, (0, 255, 255))
+                        cv2.polylines(frame, [pts], True, (0, 0, 255))
 
 def initialize(configFilename, readerName):
     with open(configFilename) as infile:
