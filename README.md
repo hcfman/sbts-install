@@ -20,7 +20,7 @@ cd sbts-install
 sudo -H ./sbts_install_stalkedbythestate.sh
 ```
 
-The whole system will be installed and reboot, after which the system will be running the software.
+Answer "No" (The default) to the question relating to automatically restarting the docker daemon. The whole system will be installed and reboot, after which the system will be running the software.
 
 To view the user interface type in:
 
