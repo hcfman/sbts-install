@@ -134,7 +134,7 @@ install_packages() {
     echo "Installing packages"
     echo ""
 
-    for package in  openjdk-8-jdk python3-numpy python3-pip libgeos-3.6.2 libgeos-c1v5 apache2 letsencrypt python3-certbot-apache python3-opencv maven; do
+    for package in  openjdk-8-jdk python3-numpy python3-pip libgeos-3.6.2 libgeos-c1v5 apache2 letsencrypt python3-certbot-apache python3-opencv maven vlc; do
         if ! dpkg -l "$package" > /dev/null 2>&1 ; then
             echo "Installing package \"$package\""
             install_package "$package"
@@ -545,7 +545,7 @@ install_secure() {
 	sudo -H -u "$SUDO_USER" mkdir "$SUDO_USER_HOME/sbts-secure" || abort "Can't create $SUDO_USER_HOME/sbts-secure"
     fi
 
-    if ! sudo -H -u "$SUDO_USER" cp -p -r resources/secure/sbts-secure.py resources/secure/sbts-test.py resources/secure/start_secure.sh resources/secure/multi_secureparse resources/secure/sbts-draw.py resources/secure/sbts-annotate.py "$SUDO_USER_HOME/sbts-secure" ; then
+    if ! sudo -H -u "$SUDO_USER" cp -p -r resources/secure/sbts-secure.py resources/secure/sbts-test.py resources/secure/start_secure.sh resources/secure/multi_secureparse resources/secure/sbts-draw.py resources/secure/sbts-annotate.py resources/secure/vlc_front.sh resources/secure/vlc_back.sh "$SUDO_USER_HOME/sbts-secure" ; then
 	abort "Can't install the \"secure\" program"
     fi
 
