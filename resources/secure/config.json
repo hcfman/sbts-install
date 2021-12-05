@@ -38,7 +38,7 @@
                       "minWidth": 10,
                       "maxWidth": 200,
                       "confidence": 0.50,
-                      "advanceSkip": true,
+                      "advanceSkip": false,
                       "namedPolygon": "Far"
                     }],[{
                       "name": "yolov4",
@@ -48,7 +48,7 @@
                       "minWidth": 10,
                       "maxWidth": 200,
                       "confidence": 0.50,
-                      "advanceSkip": true,
+                      "advanceSkip": false,
                       "namedPolygon": "Far"
                     }]]
                 }
@@ -81,7 +81,7 @@
                       "minWidth": 10,
                       "maxWidth": 200,
                       "confidence": 0.50,
-                      "advanceSkip": true,
+                      "advanceSkip": false,
                       "namedPolygon": "Close left top"
                     },{
                       "name": "yolov4",
@@ -91,7 +91,7 @@
                       "minWidth": 10,
                       "maxWidth": 200,
                       "confidence": 0.50,
-                      "advanceSkip": true,
+                      "advanceSkip": false,
                       "namedPolygon": "Close left top"
                     }]]
                 },
@@ -105,7 +105,7 @@
                       "minWidth": 10,
                       "maxWidth": 200,
                       "confidence": 0.50,
-                      "advanceSkip": true,
+                      "advanceSkip": false,
                       "namedPolygon": "Close left bottom"
                     },{
                       "name": "yolov4",
@@ -115,7 +115,7 @@
                       "minWidth": 10,
                       "maxWidth": 200,
                       "confidence": 0.50,
-                      "advanceSkip": true,
+                      "advanceSkip": false,
                       "namedPolygon": "Close left bottom"
                     }]]
                 }
@@ -131,7 +131,7 @@
                       "minWidth": 0,
                       "maxWidth": 1000,
                       "confidence": 0.0,
-                      "advanceSkip": true,
+                      "advanceSkip": false,
                       "namedPolygon": "False alert area"
                     }],[{
                       "name": "yolov4",
@@ -141,7 +141,7 @@
                       "minWidth": 0,
                       "maxWidth": 1000,
                       "confidence": 0.0,
-                      "advanceSkip": true,
+                      "advanceSkip": false,
                       "namedPolygon": "False alert area"
                     }]]
                 }
@@ -172,7 +172,7 @@
                       "minWidth": 10,
                       "maxWidth": 200,
                       "confidence": 0.50,
-                      "advanceSkip": true,
+                      "advanceSkip": false,
                       "namedPolygon": "Close right"
                     },{
                       "name": "yolov4",
@@ -182,7 +182,7 @@
                       "minWidth": 10,
                       "maxWidth": 200,
                       "confidence": 0.50,
-                      "advanceSkip": true,
+                      "advanceSkip": false,
                       "namedPolygon": "Close right"
                     }]]
                 }
@@ -227,7 +227,7 @@
                       "minWidth": 10,
                       "maxWidth": 200,
                       "confidence": 0.50,
-                      "advanceSkip": true,
+                      "advanceSkip": false,
                       "namedPolygon": "Back",
                       "counter": 3
                     }],[{
@@ -238,7 +238,7 @@
                       "minWidth": 10,
                       "maxWidth": 200,
                       "confidence": 0.50,
-                      "advanceSkip": true,
+                      "advanceSkip": false,
                       "namedPolygon": "Back",
                       "counter": 3
                     }]]
