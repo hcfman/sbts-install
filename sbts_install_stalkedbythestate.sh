@@ -565,6 +565,10 @@ install_secure() {
 	abort "Can't install config.json to $SUDO_USER_HOME/config/secure/resources"
     fi
 
+    if ! sudo -H -u "$SUDO_USER" cp -r resources/secure/nano_config.json "$SUDO_USER_HOME/config/secure/resources" ; then
+	abort "Can't install nano_config.json to $SUDO_USER_HOME/config/secure/resources"
+    fi
+
     if [ ! -L "$SUDO_USER_HOME/sbts-secure/resources" ] ; then
 	if ! sudo -H -u "$SUDO_USER" ln -s "$SUDO_USER_HOME/config/secure/resources" "$SUDO_USER_HOME/sbts-secure/resources" ; then
 	    abort "Can't create symlink from $SUDO_USER_HOME/config/secure/resources to $SUDO_USER_HOME/sbts-secure/resources"
@@ -573,13 +577,25 @@ install_secure() {
 
     if fgrep '${admin.user}' "$SUDO_USER_HOME/config/secure/resources/config.json" > /dev/null ; then
 	if ! perl -pi -e "s%\\\$\\{admin\\.user\\}%${tomcat_username}%g" "$SUDO_USER_HOME/config/secure/resources/config.json" ; then
-	    abort "Can't alter the config.json Username"
+	    abort "Can't alter the tomcat Username in config.json"
 	fi
     fi
 
     if fgrep '${admin.password}' "$SUDO_USER_HOME/config/secure/resources/config.json" > /dev/null ; then
 	if ! perl -pi -e "s%\\\$\\{admin\\.password\\}%${tomcat_password}%g" "$SUDO_USER_HOME/config/secure/resources/config.json" ; then
-	    abort "Can't alter the tomcat Password"
+	    abort "Can't alter the tomcat Password config.json"
+	fi
+    fi
+
+    if fgrep '${admin.user}' "$SUDO_USER_HOME/config/secure/resources/nano_config.json" > /dev/null ; then
+	if ! perl -pi -e "s%\\\$\\{admin\\.user\\}%${tomcat_username}%g" "$SUDO_USER_HOME/config/secure/resources/nano_config.json" ; then
+	    abort "Can't alter the tomcat Username in nano_config.json"
+	fi
+    fi
+
+    if fgrep '${admin.password}' "$SUDO_USER_HOME/config/secure/resources/nano_config.json" > /dev/null ; then
+	if ! perl -pi -e "s%\\\$\\{admin\\.password\\}%${tomcat_password}%g" "$SUDO_USER_HOME/config/secure/resources/nano_config.json" ; then
+	    abort "Can't alter the tomcat Password nano_config.json"
 	fi
     fi
 }

@@ -1,8 +1,5 @@
 {
   "modelList": {
-    "yolov3": {
-      "url": "ws://127.0.0.1:8765"
-    },
     "yolov4": {
       "url": "ws://127.0.0.1:8766"
     }
@@ -31,16 +28,6 @@
                 {
                   "name": "Far zone1 include",
                   "models": [[{
-                      "name": "yolov3",
-                      "category": "person",
-                      "minHeight": 35,
-                      "maxHeight": 570,
-                      "minWidth": 10,
-                      "maxWidth": 200,
-                      "confidence": 0.50,
-                      "advanceSkip": false,
-                      "namedPolygon": "Far"
-                    }],[{
                       "name": "yolov4",
                       "category": "person",
                       "minHeight": 35,
@@ -74,16 +61,6 @@
                 {
                   "name": "Close left top include",
                   "models": [[{
-                      "name": "yolov3",
-                      "category": "person",
-                      "minHeight": 35,
-                      "maxHeight": 570,
-                      "minWidth": 10,
-                      "maxWidth": 200,
-                      "confidence": 0.50,
-                      "advanceSkip": false,
-                      "namedPolygon": "Close left top"
-                    },{
                       "name": "yolov4",
                       "category": "person",
                       "minHeight": 35,
@@ -98,16 +75,6 @@
                 {
                   "name": "Close left bottom include",
                   "models": [[{
-                      "name": "yolov3",
-                      "category": "person",
-                      "minHeight": 35,
-                      "maxHeight": 570,
-                      "minWidth": 10,
-                      "maxWidth": 200,
-                      "confidence": 0.50,
-                      "advanceSkip": false,
-                      "namedPolygon": "Close left bottom"
-                    },{
                       "name": "yolov4",
                       "category": "person",
                       "minHeight": 35,
@@ -124,16 +91,6 @@
                 {
                   "name": "Close left bottom exclude",
                   "models": [[{
-                      "name": "yolov3",
-                      "category": "person",
-                      "minHeight": 0,
-                      "maxHeight": 1000,
-                      "minWidth": 0,
-                      "maxWidth": 1000,
-                      "confidence": 0.0,
-                      "advanceSkip": false,
-                      "namedPolygon": "False alert area"
-                    }],[{
                       "name": "yolov4",
                       "category": "person",
                       "minHeight": 0,
@@ -165,16 +122,6 @@
                 {
                   "name": "Close right include",
                   "models": [[{
-                      "name": "yolov3",
-                      "category": "person",
-                      "minHeight": 35,
-                      "maxHeight": 570,
-                      "minWidth": 10,
-                      "maxWidth": 200,
-                      "confidence": 0.50,
-                      "advanceSkip": false,
-                      "namedPolygon": "Close right"
-                    },{
                       "name": "yolov4",
                       "category": "person",
                       "minHeight": 35,
@@ -220,17 +167,6 @@
                 {
                   "name": "Back zone1 include",
                   "models": [[{
-                      "name": "yolov3",
-                      "category": "person",
-                      "minHeight": 35,
-                      "maxHeight": 570,
-                      "minWidth": 10,
-                      "maxWidth": 200,
-                      "confidence": 0.50,
-                      "advanceSkip": false,
-                      "namedPolygon": "Back",
-                      "counter": 3
-                    }],[{
                       "name": "yolov4",
                       "category": "person",
                       "minHeight": 35,
