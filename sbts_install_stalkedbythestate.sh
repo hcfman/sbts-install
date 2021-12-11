@@ -6,7 +6,7 @@ UPDATED=
 
 APP_FILE="stalkedbythestate_app_jetson_v1.00.tar.gz"
 APP_URL="https://github.com/hcfman/stalkedbythestate/releases/download/stalkedbythestate_app_jetson_v1.00/$APP_FILE"
-APP_CHECKSUM="7bc93c88af1ae0abf352f3313b22ccad"
+APP_CHECKSUM="e15a6e400ab9939ec6f9308ce3ff17a5"
 
 disk_list=()
 
@@ -458,6 +458,18 @@ unpack_app() {
     if fgrep '${admin.password}' "$SUDO_USER_HOME/app/tomcat/apache-tomcat-9.0.45/conf/tomcat-users.xml" > /dev/null ; then
 	if ! perl -pi -e "s%\\\$\\{admin\\.password\\}%${tomcat_password}%g" "$SUDO_USER_HOME/app/tomcat/apache-tomcat-9.0.45/conf/tomcat-users.xml" ; then
 	    abort "Can't alter the tomcat Password"
+	fi
+    fi
+
+    if fgrep '${admin.user}' "$SUDO_USER_HOME/app/sbts.xml" > /dev/null ; then
+	if ! perl -pi -e "s%\\\$\\{admin\\.user\\}%${tomcat_username}%g" "$SUDO_USER_HOME/app/sbts.xml" ; then
+	    abort "Can't alter the tomcat Username in sbts.xml"
+	fi
+    fi
+
+    if fgrep '${admin.password}' "$SUDO_USER_HOME/app/sbts.xml" > /dev/null ; then
+	if ! perl -pi -e "s%\\\$\\{admin\\.password\\}%${tomcat_password}%g" "$SUDO_USER_HOME/app/sbts.xml" ; then
+	    abort "Can't alter the tomcat Password sbts.xml"
 	fi
     fi
 
