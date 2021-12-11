@@ -533,7 +533,7 @@ move_disk_to_disk_partition() {
 install_secure() {
     cd "$HERE" || abort "Can't change back to $HERE"
 
-    if [ -f "$SUDO_USER_HOME/sbts-secure/config.json" -a -f "$SUDO_USER_HOME/sbts-secure/sbts-secure.py" -a -f "$SUDO_USER_HOME/sbts-secure/start_secure.sh" -a -f "" -a -d "$SUDO_USER_HOME/sbts-secure/multi_secureparse" -a -d "$SUDO_USER_HOME/config/secure/resources" ] ; then
+    if [ -f "$SUDO_USER_HOME/config/secure/resources/config.json" -a -f "$SUDO_USER_HOME/config/secure/resources/nano_config.json" -a -f "$SUDO_USER_HOME/sbts-secure/sbts-secure.py" -a -f "$SUDO_USER_HOME/sbts-secure/start_secure.sh" -a -f "" -a -d "$SUDO_USER_HOME/sbts-secure/multi_secureparse" -a -d "$SUDO_USER_HOME/config/secure/resources" ] ; then
 	return
     fi
 
