@@ -598,6 +598,14 @@ install_secure() {
 	    abort "Can't alter the tomcat Password nano_config.json"
 	fi
     fi
+
+    if [ "$PLATFORM_LABEL" == "NVIDIA Jetson Nano Developer Kit" ] ; then
+        if grep /config.json "$SUDO_USER_HOME/sbts-secure/start_secure.sh" > /dev/null ; then
+            if ! perl -pi -e "s%/config.json%/nano_config.json%g" "$SUDO_USER_HOME/sbts-secure/start_secure.sh" ; then
+                abort "Can't set the correct config file for the nano"
+            fi
+        fi
+    fi
 }
 
 determine_partition_base() {
@@ -685,8 +693,8 @@ EOF
 
 sleep 20
 
-#su - "${SUDO_USER}" -c "${SUDO_USER_HOME}/sbts-secure/vlc_front.sh > /dev/null 2>&1 &" &
-#su - "${SUDO_USER}" -c "${SUDO_USER_HOME}/sbts-secure/vlc_back.sh > /dev/null 2>&1 &" &
+su - "${SUDO_USER}" -c "${SUDO_USER_HOME}/sbts-secure/vlc_front.sh > /dev/null 2>&1 &" &
+su - "${SUDO_USER}" -c "${SUDO_USER_HOME}/sbts-secure/vlc_back.sh > /dev/null 2>&1 &" &
 
 su - "${SUDO_USER}" -c "${SUDO_USER_HOME}/app/bin/start.sh > /dev/null 2>&1 &" &
 
