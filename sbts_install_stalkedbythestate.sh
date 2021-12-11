@@ -461,14 +461,14 @@ unpack_app() {
 	fi
     fi
 
-    if fgrep '${admin.user}' "$SUDO_USER_HOME/app/sbts.xml" > /dev/null ; then
-	if ! perl -pi -e "s%\\\$\\{admin\\.user\\}%${tomcat_username}%g" "$SUDO_USER_HOME/app/sbts.xml" ; then
+    if fgrep '${tomcat.username}' "$SUDO_USER_HOME/app/sbts.xml" > /dev/null ; then
+	if ! perl -pi -e "s%\\\$\\{tomcat\\.username\\}%${tomcat_username}%g" "$SUDO_USER_HOME/app/sbts.xml" ; then
 	    abort "Can't alter the tomcat Username in sbts.xml"
 	fi
     fi
 
-    if fgrep '${admin.password}' "$SUDO_USER_HOME/app/sbts.xml" > /dev/null ; then
-	if ! perl -pi -e "s%\\\$\\{admin\\.password\\}%${tomcat_password}%g" "$SUDO_USER_HOME/app/sbts.xml" ; then
+    if fgrep '${tomcat.password}' "$SUDO_USER_HOME/app/sbts.xml" > /dev/null ; then
+	if ! perl -pi -e "s%\\\$\\{tomcat\\.password\\}%${tomcat_password}%g" "$SUDO_USER_HOME/app/sbts.xml" ; then
 	    abort "Can't alter the tomcat Password sbts.xml"
 	fi
     fi
