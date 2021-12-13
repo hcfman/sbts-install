@@ -24,7 +24,7 @@ and your cameras and other devices over https
 * Elicit a real-world response. Supports out of the box Phidget Interfacekit USB I/O controllers for switching relays or
 reading switches, smoke/carbon monoxide detectors and other wired sensors. Read responses from commonly available remote controls
 such as from Klikaanklikuit in the Netherlands. Or control klikaanklikuit devices.
-* Builtin Certificate manager. GUI controlled generation of X509 certificiates and importing and exporting of certificates. Use
+* Builtin Certificate manager. GUI controlled generation of X509 certificates and importing and exporting of certificates. Use
 self-signed certificates or real ones. Use https internally for device-device communications
 * Websocket based event subscribe interface
 * Resilient mode of operation that runs the OS in read-only mode with a read-write memory overlay layer and the configuration
