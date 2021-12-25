@@ -760,7 +760,7 @@ make_readonly_and_reboot() {
     echo "Successfully installed stalkedbythestate"
     echo ""
 
-    echo "A reboot is now required to finish installation. After the reboot, the system will be running on read-only mode"
+    echo "A reboot is now required to finish installation. After the reboot, the system will be running in read-only mode"
     echo ""
 
     echo "Rebooting in 10 seconds..."
