@@ -705,8 +705,8 @@ EOF
 
 sleep 20
 
-su - "${SUDO_USER}" -c "${SUDO_USER_HOME}/sbts-secure/vlc_front.sh > /dev/null 2>&1 &" &
-su - "${SUDO_USER}" -c "${SUDO_USER_HOME}/sbts-secure/vlc_back.sh > /dev/null 2>&1 &" &
+su - "${SUDO_USER}" -c "${SUDO_USER_HOME}/sbts-local/vlc_front.sh > /dev/null 2>&1 &" &
+su - "${SUDO_USER}" -c "${SUDO_USER_HOME}/sbts-local/vlc_back.sh > /dev/null 2>&1 &" &
 
 su - "${SUDO_USER}" -c "${SUDO_USER_HOME}/app/bin/start.sh > /dev/null 2>&1 &" &
 
@@ -768,6 +768,23 @@ make_readonly_and_reboot() {
     reboot
 }
 
+create_sbts_local() {
+    echo "Create sbts-local"
+    echo ""
+
+    if [ ! -d "${SUDO_USER_HOME}/sbts-local" ] ; then
+	mkdir "${SUDO_USER_HOME}/sbts-local" || abort "Can't create ${SUDO_USER_HOME}/sbts-local"
+    fi
+
+    if [ ! -f "${SUDO_USER_HOME}/sbts-local/vlc_front.sh" ] ; then
+	cp -p "${SUDO_USER_HOME}/sbts-secure/vlc_front.sh" "${SUDO_USER_HOME}/sbts-local" || abort "Can't cp ${SUDO_USER_HOME}/sbts-secure/vlc_front.sh to ${SUDO_USER_HOME}/sbts-local"
+    fi
+
+    if [ ! -f "${SUDO_USER_HOME}/sbts-local/vlc_back.sh" ] ; then
+	cp -p "${SUDO_USER_HOME}/sbts-secure/vlc_back.sh" "${SUDO_USER_HOME}/sbts-local" || abort "Can't cp ${SUDO_USER_HOME}/sbts-secure/vlc_back.sh to ${SUDO_USER_HOME}/sbts-local"
+    fi
+}
+
 #
 # Main
 #
@@ -825,6 +842,8 @@ install_secure
 determine_partition_base
 
 update_etc_rc
+
+create_sbts_local
 
 disable_docker_again
 
