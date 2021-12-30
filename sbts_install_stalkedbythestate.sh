@@ -781,25 +781,25 @@ create_sbts_local() {
     echo ""
 
     if [ ! -d "${SUDO_USER_HOME}/sbts-local" ] ; then
-        sudo -H -u "$SUDO_USER" "mkdir $SUDO_USER_HOME/sbts-local" || abort "Can't create ${SUDO_USER_HOME}/sbts-local"
+        sudo -H -u "$SUDO_USER" mkdir "$SUDO_USER_HOME/sbts-local" || abort "Can't create ${SUDO_USER_HOME}/sbts-local"
     fi
 
     if [ ! -f "${SUDO_USER_HOME}/sbts-local/vlc_front.sh" ] ; then
-	sudo -H -u "$SUDO_USER" "cp -p ${SUDO_USER_HOME}/sbts-secure/vlc_front.sh ${SUDO_USER_HOME}/sbts-local" || abort "Can't cp ${SUDO_USER_HOME}/sbts-secure/vlc_front.sh to ${SUDO_USER_HOME}/sbts-local"
+	sudo -H -u "$SUDO_USER" cp -p "${SUDO_USER_HOME}/sbts-secure/vlc_front.sh" "${SUDO_USER_HOME}/sbts-local" || abort "Can't cp ${SUDO_USER_HOME}/sbts-secure/vlc_front.sh to ${SUDO_USER_HOME}/sbts-local"
     fi
 
     if [ ! -f "${SUDO_USER_HOME}/sbts-local/vlc_back.sh" ] ; then
-	sudo -H -u "$SUDO_USER" "cp -p ${SUDO_USER_HOME}/sbts-secure/vlc_back.sh ${SUDO_USER_HOME}/sbts-local" || abort "Can't cp ${SUDO_USER_HOME}/sbts-secure/vlc_back.sh to ${SUDO_USER_HOME}/sbts-local"
+	sudo -H -u "$SUDO_USER" cp -p "${SUDO_USER_HOME}/sbts-secure/vlc_back.sh" "${SUDO_USER_HOME}/sbts-local" || abort "Can't cp ${SUDO_USER_HOME}/sbts-secure/vlc_back.sh to ${SUDO_USER_HOME}/sbts-local"
     fi
 }
 
 install_dynu_client() {
     if [ ! -f "${SUDO_USER_HOME}/sbts-local/dynu_client.py" ] ; then
-        sudo -H -u "$SUDO_USER" "cp -p resources/dynu/dynu_client.py ${SUDO_USER_HOME}/sbts-local" || abort "Can't copy dynu_client.py to ${SUDO_USER_HOME}/sbts-local"
+        sudo -H -u "$SUDO_USER" cp -p resources/dynu/dynu_client.py "${SUDO_USER_HOME}/sbts-local" || abort "Can't copy dynu_client.py to ${SUDO_USER_HOME}/sbts-local"
     fi
 
     if [ ! -f "${SUDO_USER_HOME}/sbts-local/dynuParams.config" ] ; then
-        sudo -H -u "$SUDO_USER" "cp resources/dynu/dynuParams.config ${SUDO_USER_HOME}/sbts-local" || abort "Can't copy dynuParams.config to ${SUDO_USER_HOME}/sbts-local"
+        sudo -H -u "$SUDO_USER" cp resources/dynu/dynuParams.config "${SUDO_USER_HOME}/sbts-local" || abort "Can't copy dynuParams.config to ${SUDO_USER_HOME}/sbts-local"
     fi
 }
 
@@ -810,7 +810,7 @@ add_crontabs() {
     rm /tmp/root_crontab > /dev/null 2>&1
 
     echo "# $(perl -e 'print int(rand(59))') $(perl -e 'print int(rand(23))') * * *  $SUDO_USER_HOME/sbts-local/dynu_client.py > $SUDO_USER_HOME/disk/log/dynu_client.log 2>&1" > /tmp/user_crontab
-    sudo -H -u "$SUDO_USER" "crontab /tmp/user_crontab" || abort "Can't install dynu client into user crontab"
+    sudo -H -u "$SUDO_USER" crontab /tmp/user_crontab || abort "Can't install dynu client into user crontab"
     rm /tmp/user_crontab > /dev/null 2>&1
 }
 
