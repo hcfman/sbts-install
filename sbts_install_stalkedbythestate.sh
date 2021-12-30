@@ -806,6 +806,10 @@ add_crontabs() {
 
     crontab /tmp/root_crontab || abort "Can't set root crontab to renew letsencrypt certificate"
     rm /tmp/root_crontab > /dev/null 2>&1
+
+    echo "# $(perl -e 'print int(rand(59))') $(perl -e 'print int(rand(23))') * * *  $SUDO_USER_HOME/sbts-local/dynu_client.py > $SUDO_USER_HOME/disk/log/dynu_client.log 2>&1" > /tmp/user_crontab
+    sudo -H -u "$SUDO_USER" "crontab /tmp/user_crontab" || abort "Can't install dynu client into user crontab"
+    rm /tmp/user_crontab > /dev/null 2>&1
 }
 
 #
