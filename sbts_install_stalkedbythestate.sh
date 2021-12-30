@@ -6,7 +6,7 @@ UPDATED=
 
 APP_FILE="stalkedbythestate_app_jetson_v1.00.tar.gz"
 APP_URL="https://github.com/hcfman/stalkedbythestate/releases/download/stalkedbythestate_app_jetson_v1.00/$APP_FILE"
-APP_CHECKSUM="7d516a605ff43fad1225687b8007cf78"
+APP_CHECKSUM="fa3ce36140e0d271119f0e6586c7bb9e"
 
 disk_list=()
 
