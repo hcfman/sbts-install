@@ -540,6 +540,12 @@ move_disk_to_disk_partition() {
     migrate_sbts_dir "$SUDO_USER_HOME/app/conf" "$SUDO_USER_HOME/config/sbts"
     migrate_sbts_dir "$SUDO_USER_HOME/app/certs" "$SUDO_USER_HOME/config/sbts"
     migrate_sbts_dir "$SUDO_USER_HOME/app/cacerts" "$SUDO_USER_HOME/config/sbts"
+
+    if [ ! -d "$SUDO_USER_HOME/disk/log" ] ; then
+        mkdir "$SUDO_USER_HOME/disk/log" || abort "Can't create $SUDO_USER_HOME/disk/log"
+    fi
+
+    chown -R "$SUDO_USER:$SUDO_USER" "$SUDO_USER_HOME/disk/log" || abort "Can't chown $SUDO_USER:$SUDO_USER $SUDO_USER_HOME/disk/log"
 }
 
 install_secure() {
