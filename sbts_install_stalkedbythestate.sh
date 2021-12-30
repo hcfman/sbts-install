@@ -677,6 +677,8 @@ mount ${partition_base_path}3 ${SUDO_USER_HOME}/disk
 
 systemctl start apache2
 
+# su - $SUDO_USER -c '$SUDO_USER_HOME/sbts-local/dynu_client.py > $SUDO_USER_HOME/disk/log/dynu_client.log'
+
 # Choose just one of the below, comment out the ones that are not chosen
 EOF
 
