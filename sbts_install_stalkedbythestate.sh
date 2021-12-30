@@ -792,7 +792,7 @@ create_sbts_local() {
 }
 
 add_crontabs() {
-    echo "# $(perl -e 'print int(rand(59))') $(perl -e 'print int(rand(23))') * * * su $SUDO_USER - -c \"$SUDO_USER_HOME/sbts-bin/mount_readwrite\";(/usr/bin/certbot --apache --renew-hook \"systemctl restart apache2\" renew > $SUDO_USER_HOME/disk/log/certbot.log 2>&1);su $SUDO_USER - -c \"$SUDO_USER_HOME/sbts-bin/mount_readonly\"" > /tmp/root_crontab || abort "Can't create root crontab file"
+    echo "# $(perl -e 'print int(rand(59))') $(perl -e 'print int(rand(23))') * * * su $SUDO_USER - -c \"sleep 2; $SUDO_USER_HOME/sbts-bin/mount_readwrite\";(/usr/bin/certbot --apache --renew-hook \"systemctl restart apache2\" renew > $SUDO_USER_HOME/disk/log/certbot.log 2>&1);su $SUDO_USER - -c \"$SUDO_USER_HOME/sbts-bin/mount_readonly\"" > /tmp/root_crontab || abort "Can't create root crontab file"
 
     crontab /tmp/root_crontab || abort "Can't set root crontab to renew letsencrypt certificate"
     rm /tmp/root_crontab > /dev/null 2>&1
