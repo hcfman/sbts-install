@@ -791,6 +791,16 @@ create_sbts_local() {
     fi
 }
 
+install_dynu_client() {
+    if [ ! -f "${SUDO_USER_HOME}/sbts-local/dynu_client.py" ] ; then
+        sudo -H -u "$SUDO_USER" "cp -p resources/dynu/dynu_client.py ${SUDO_USER_HOME}/sbts-local" || abort "Can't copy dynu_client.py to ${SUDO_USER_HOME}/sbts-local"
+    fi
+
+    if [ ! -f "${SUDO_USER_HOME}/sbts-local/dynuParams.config" ] ; then
+        sudo -H -u "$SUDO_USER" "cp resources/dynu/dynuParams.config ${SUDO_USER_HOME}/sbts-local" || abort "Can't copy dynuParams.config to ${SUDO_USER_HOME}/sbts-local"
+    fi
+}
+
 add_crontabs() {
     echo "# $(perl -e 'print int(rand(59))') $(perl -e 'print int(rand(23))') * * * su $SUDO_USER - -c \"sleep 2; $SUDO_USER_HOME/sbts-bin/mount_readwrite\";(/usr/bin/certbot --apache --renew-hook \"systemctl restart apache2\" renew > $SUDO_USER_HOME/disk/log/certbot.log 2>&1);su $SUDO_USER - -c \"$SUDO_USER_HOME/sbts-bin/mount_readonly\"" > /tmp/root_crontab || abort "Can't create root crontab file"
 
@@ -857,6 +867,8 @@ determine_partition_base
 update_etc_rc
 
 create_sbts_local
+
+install_dynu_client
 
 add_crontabs
 
