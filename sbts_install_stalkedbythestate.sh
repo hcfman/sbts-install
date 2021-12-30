@@ -814,6 +814,11 @@ add_crontabs() {
     rm /tmp/user_crontab > /dev/null 2>&1
 }
 
+install_certbot_again() {
+    # This was done before but in practise I found I had to install it again afterwards. Maybe something undid something.
+    apt install -y python3-certbot-apache
+}
+
 #
 # Main
 #
@@ -877,6 +882,8 @@ create_sbts_local
 install_dynu_client
 
 add_crontabs
+
+install_certbot_again
 
 disable_docker_again
 
