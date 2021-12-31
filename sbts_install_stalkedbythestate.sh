@@ -134,7 +134,7 @@ install_packages() {
     echo "Installing packages"
     echo ""
 
-    for package in  openjdk-8-jdk python3-numpy python3-pip libgeos-3.6.2 libgeos-c1v5 apache2 letsencrypt python3-certbot-apache python3-opencv maven vlc vlc-bin; do
+    for package in  openjdk-8-jdk python3-numpy python3-pip libgeos-3.6.2 libgeos-c1v5 apache2 letsencrypt python3-certbot-apache python3-opencv maven vlc vlc-bin pwgen; do
         if ! dpkg -l "$package" > /dev/null 2>&1 ; then
             echo "Installing package \"$package\""
             install_package "$package"
