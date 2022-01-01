@@ -492,6 +492,18 @@ unpack_app() {
     if [ ! -L "$SUDO_USER_HOME/app/bin/mount_readwrite" ] ; then
 	sudo -H -u "$SUDO_USER" ln -s "$SUDO_USER_HOME/sbts-bin/mount_readwrite" "$SUDO_USER_HOME/app/bin" || abort "Can't link sbts-bin/mount_readwrite to app/bin"
     fi
+
+    if fgrep '${domainPiece}' "$SUDO_USER_HOME/app/conf/sbts.xml" > /dev/null ; then
+	if ! perl -pi -e "s%\\\$\\{domainPiece\\}%${DOMAIN_PIECE}%g" "$SUDO_USER_HOME/app/conf/sbts.xml" ; then
+	    abort "Can't alter the sbts.xml domainPiece"
+	fi
+    fi
+
+    if fgrep '${domainPrefix}' "$SUDO_USER_HOME/app/conf/sbts.xml" > /dev/null ; then
+	if ! perl -pi -e "s%\\\$\\{domainPrefix\\}%${DOMAIN_PREFIX}%g" "$SUDO_USER_HOME/app/conf/sbts.xml" ; then
+	    abort "Can't alter the sbts.xml domainPrefix"
+	fi
+    fi
 }
 
 create_reboot_and_shutdown() {
@@ -791,6 +803,25 @@ create_sbts_local() {
     if [ ! -f "${SUDO_USER_HOME}/sbts-local/vlc_back.sh" ] ; then
 	sudo -H -u "$SUDO_USER" cp -p "${SUDO_USER_HOME}/sbts-secure/vlc_back.sh" "${SUDO_USER_HOME}/sbts-local" || abort "Can't cp ${SUDO_USER_HOME}/sbts-secure/vlc_back.sh to ${SUDO_USER_HOME}/sbts-local"
     fi
+
+    if [ ! -f "${SUDO_USER_HOME}/sbts-local/000-default-le-ssl.conf" ] ; then
+        if ! sudo -H -u "$SUDO_USER" cp -r resources/letsencrypt/000-default-le-ssl.conf "$SUDO_USER_HOME/sbts-local" ; then
+            abort "Can't install 000-default-le-ssl.conf to $SUDO_USER_HOME/sbts-local"
+        fi
+
+    fi
+
+    if fgrep '${domainPiece}' "$SUDO_USER_HOME/sbts-local/000-default-le-ssl.conf" > /dev/null ; then
+	if ! perl -pi -e "s%\\\$\\{domainPiece\\}%${DOMAIN_PIECE}%g" "$SUDO_USER_HOME/sbts-local/000-default-le-ssl.conf" ; then
+	    abort "Can't alter the 000-default-le-ssl.conf domainPiece"
+	fi
+    fi
+
+    if fgrep '${domainPrefix}' "$SUDO_USER_HOME/sbts-local/000-default-le-ssl.conf" > /dev/null ; then
+	if ! perl -pi -e "s%\\\$\\{domainPrefix\\}%${DOMAIN_PREFIX}%g" "$SUDO_USER_HOME/sbts-local/000-default-le-ssl.conf" ; then
+	    abort "Can't alter the 000-default-le-ssl.conf domainPrefix"
+	fi
+    fi
 }
 
 install_dynu_client() {
@@ -832,6 +863,9 @@ if [ ! "$SUDO_USER" -o "$SUDO_USER" == "root" ] ; then
 fi
 
 SUDO_USER_HOME=$(getent passwd "$SUDO_USER" | cut -d: -f6)
+
+DOMAIN_PIECE=$(pwgen 10 1)
+DOMAIN_PREFIX=$(pwgen 10 1)
 
 sanity_check
 
