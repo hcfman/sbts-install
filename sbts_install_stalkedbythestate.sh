@@ -850,6 +850,11 @@ install_certbot_again() {
     apt install -y python3-certbot-apache
 }
 
+set_prefixes() {
+    DOMAIN_PIECE=$(pwgen 10 1)
+    DOMAIN_PREFIX=$(pwgen 10 1)
+}
+
 #
 # Main
 #
@@ -864,9 +869,6 @@ fi
 
 SUDO_USER_HOME=$(getent passwd "$SUDO_USER" | cut -d: -f6)
 
-DOMAIN_PIECE=$(pwgen 10 1)
-DOMAIN_PREFIX=$(pwgen 10 1)
-
 sanity_check
 
 get_credentials
@@ -876,6 +878,8 @@ determine_platform_branch
 update_pkg_registry
 
 install_packages
+
+set_prefixes
 
 remove_apache_default_pages
 
