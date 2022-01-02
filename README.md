@@ -65,7 +65,7 @@ http://your-ip-address:8080/sbts/
 
 with the account details you entered when installing.
 
-This software is now released. For detailed tutorials about using this software please view my YouTube channel
+For detailed tutorials about using this software please view my YouTube channel
 
 https://www.youtube.com/channel/UCXn7Z37_xwuxLPpcPTtdNRQ
 
