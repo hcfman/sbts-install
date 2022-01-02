@@ -71,9 +71,4 @@ https://www.youtube.com/channel/UCXn7Z37_xwuxLPpcPTtdNRQ
 
 where installation and configuration videos are available and with new ones being added regularly.
 
-## Configuration ##
-
-The first configuration video that gives you good insight into it's capabilities is available here: https://www.youtube.com/watch?v=P5kXAv12Gmc
-
- 
-
+Kim Hendrikse
