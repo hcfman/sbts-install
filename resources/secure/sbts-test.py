@@ -168,6 +168,7 @@ def readConfigFile():
         for camera in configJson["cameraList"]:
             if camera["name"] == args.cameraName:
                 cameraReader = CameraReader.from_json(camera)
+                cameraReader.setUrl(args.streamUrl)
                 cameraReader.enable()
                 cameras.append(cameraReader)
 
