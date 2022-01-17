@@ -206,9 +206,11 @@ class CameraReader(Thread):
     def getLastImage(self):
         self.lock.acquire()
         try:
-            returnImage = self.image
             if self.image != None and self.image != self.lastImage:
                 self.lastImage = self.image
+                returnImage = self.lastImage
+            else:
+                returnImage = None
         finally:
             self.lock.release()
 
