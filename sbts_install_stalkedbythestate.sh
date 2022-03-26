@@ -545,6 +545,7 @@ install_tomcat() {
     TOMCAT_VERSION=$(echo "$SUDO_USER_HOME"/app/tomcat/apache-tomcat-* | sed -e 's/.*apache-tomcat-//')
 
     migrate_sbts_dir "$SUDO_USER_HOME/app/tomcat/apache-tomcat-${TOMCAT_VERSION}/conf" "$SUDO_USER_HOME/config/tomcat"
+    migrate_sbts_dir "$SUDO_USER_HOME/app/tomcat/apache-tomcat-${TOMCAT_VERSION}/logs" "$SUDO_USER_HOME/disk/tomcat"
 }
 
 move_disk_to_disk_partition() {
