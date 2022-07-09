@@ -455,6 +455,7 @@ install_darknet() {
 }
 
 install_yolov7() {
+    YOLOV7_SBTS_STABLE_COMMIT="9ee1835a7e38254182bdddd46d33484e05d009b7"
     YOLOV7_URL="https://github.com/WongKinYiu/yolov7.git"
 
     echo ""
@@ -468,20 +469,34 @@ install_yolov7() {
 
     cd "$SUDO_USER_HOME" || abort "Can't change directory to $SUDO_USER_HOME"
 
-    if ! su "$SUDO_USER" -c "git clone \"YOLOV7_URL\" yolov7" ; then
+    if ! su "$SUDO_USER" -c "git clone \"$YOLOV7_URL\" yolov7" ; then
         abort "Can't clone YOLOV7_URL"
     fi
 
     cd "$SUDO_USER_HOME/yolov7" || abort "Can't change to $SUDO_USER_HOME/yolov7"
 
-    mkdir weights
+    # Stable with sbts code
+    if ! su "$SUDO_USER" -c "git checkout \"$YOLOV7_SBTS_STABLE_COMMIT\"" ; then
+        abort "Can't checkout SBTS stable commit for yolov7"
+    fi
 
+    if ! su "$SUDO_USER" -c "mkdir runs" ; then
+        abort "Can't create runs directory"
+    fi
+
+    migrate_sbts_dir "$SUDO_USER_HOME/yolov7/runs" "$SUDO_USER_HOME/disk/yolov7"
+
+    mkdir weights
     if ! cd "weights" ; then
         abort "Can't directory to weights"
     fi
 
     download_file "https://github.com/WongKinYiu/yolov7/releases/download/v0.1/yolov7-e6e.pt"
     download_file "https://github.com/WongKinYiu/yolov7/releases/download/v0.1/yolov7-d6.pt"
+    download_file "https://github.com/WongKinYiu/yolov7/releases/download/v0.1/yolov7-e6.pt"
+    download_file "https://github.com/WongKinYiu/yolov7/releases/download/v0.1/yolov7-w6.pt"
+    download_file "https://github.com/WongKinYiu/yolov7/releases/download/v0.1/yolov7x.pt"
+    download_file "https://github.com/WongKinYiu/yolov7/releases/download/v0.1/yolov7.pt"
 }
 
 install_alexeyab_darknet() {
