@@ -454,7 +454,20 @@ install_darknet() {
 
 }
 
+has_more_than_4GB() {
+    if (( $(fgrep MemTotal /proc/meminfo |awk '{print $2}') > 5000000 )) ; then
+        return 0
+    else
+        return 1
+    fi
+}
+
 install_yolov7() {
+    # This needs around 4GB of resident memory to run
+    if ! has_more_than_4GB ; then
+        return
+    fi
+
     YOLOV7_SBTS_STABLE_COMMIT="9ee1835a7e38254182bdddd46d33484e05d009b7"
     YOLOV7_URL="https://github.com/WongKinYiu/yolov7.git"
 
