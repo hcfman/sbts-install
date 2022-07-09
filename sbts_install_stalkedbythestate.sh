@@ -315,6 +315,16 @@ install_python_modules() {
     done
 }
 
+update_bashrc() {
+    if ! echo 'export OPENBLAS_CORETYPE=ARMV8' >> /root/.bashrc ; then
+        abort "Can't update root bashrc for OPENBLAS_CORETYPE variable"
+    fi
+
+    if ! su "$SUDO_USER" -c "echo 'export OPENBLAS_CORETYPE=ARMV8' >> $SUDO_USER_HOME/.bashrc" ; then
+        abort "Can't update $SUDO_USER_HOME/.bashrc for OPENBLAS_CORETYPE variable"
+    fi
+}
+
 install_apache2_modules() {
     echo ""
     echo "Installing apache modules"
@@ -465,16 +475,6 @@ has_more_than_4GB() {
         return 0
     else
         return 1
-    fi
-}
-
-update_bashrc() {
-    if ! echo 'export OPENBLAS_CORETYPE=ARMV8' >> /root/.bashrc ; then
-        abort "Can't update root bashrc for OPENBLAS_CORETYPE variable"
-    fi
-
-    if ! su "$SUDO_USER" -c "echo 'export OPENBLAS_CORETYPE=ARMV8' >> $SUDO_USER_HOME/.bashrc" ; then
-        abort "Can't update $SUDO_USER_HOME/.bashrc for OPENBLAS_CORETYPE variable"
     fi
 }
 
@@ -1208,6 +1208,8 @@ remove_apache_default_pages
 
 install_python_modules
 
+update_bashrc
+
 install_apache2_modules
 
 install_extra_apache2_ssl_config
@@ -1219,8 +1221,6 @@ migrate_apache2_sites-available
 install_darknet
 
 install_alexeyab_darknet
-
-update_bashrc
 
 install_yolov7
 
