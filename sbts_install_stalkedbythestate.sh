@@ -8,6 +8,9 @@ APP_FILE="stalkedbythestate_app_jetson_v1.00.tar.gz"
 APP_URL="https://github.com/hcfman/stalkedbythestate/releases/download/stalkedbythestate_app_jetson_v1.00/$APP_FILE"
 APP_CHECKSUM="539dd22daad7164a68aacf178cd7fb30"
 
+# Needed after upgrading numpy due to a bug in the upgrade version on arm
+export OPENBLAS_CORETYPE=ARMV8
+
 disk_list=()
 
 abort() {
@@ -129,12 +132,61 @@ install_package() {
     fi
 }
 
+prep_pip_installation() {
+  echo ""
+  echo "Prepare pip installation"
+  echo ""
+  apt install -y python3-pip
+  if ! dpkg -l "python3-pip" > /dev/null 2>&1 ; then
+      echo "Installing \"python3-pip\""
+      install_package "python3-pip"
+  fi
+
+  echo "Upgrade pip"
+  python3 -m pip  install --upgrade pip
+
+  echo ""
+  echo "Remove cmake"
+  if ! apt purge -y cmake ; then
+      abort "Failed to purge cmake"
+  fi
+
+  echo ""
+  echo "Remove python3-protobuf"
+  if ! apt purge -y python3-protobuf ; then
+      abort "Failed to purge python3-protobuf"
+  fi
+
+  echo ""
+  echo "Upgrade setuptools"
+  if ! python3 -m pip install setuptools==59.5.0 ; then
+      abort "Failed to upgrade setuptools to version 59.5.0"
+  fi
+
+  echo ""
+  echo "Upgrade cmake"
+
+  if ! wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null |
+          gpg --dearmor - | tee /etc/apt/trusted.gpg.d/kitware.gpg >/dev/null ; then
+      abort "Failed to add kitware key"
+  fi
+
+  if ! apt-add-repository "deb https://apt.kitware.com/ubuntu/ $(lsb_release -cs) main" ; then
+      abort "Failed to add kitware repository"
+  fi
+
+  apt update
+  if ! apt install kitware-archive-keyring ; then
+      abort "Failed to install kitware keyring"
+  fi
+}
+
 install_packages() {
     echo ""
     echo "Installing packages"
     echo ""
 
-    for package in  openjdk-8-jdk python3-numpy python3-pip libgeos-3.6.2 libgeos-c1v5 apache2 letsencrypt python3-certbot-apache python3-opencv maven vlc vlc-bin pwgen; do
+    for package in cmake libomp-dev libpng-dev libjpeg-dev curl htop openjdk-8-jdk libgeos-3.6.2 libgeos-c1v5 apache2 letsencrypt python3-certbot-apache maven vlc vlc-bin pwgen; do
         if ! dpkg -l "$package" > /dev/null 2>&1 ; then
             echo "Installing package \"$package\""
             install_package "$package"
@@ -160,10 +212,55 @@ install_module() {
     module=$1
 
     if ! python3 -c "import $module" ; then
-        echo "Installing pip3 module \"$module\""
-        if ! pip3 install "$module" ; then
+        echo "Installing python module \"$module\""
+        if ! python3 -m pip install "$module" ; then
             abort "Can't install pip3 module \"$module\""
         fi
+    fi
+}
+
+install_extra_wheels() {
+    if ! cd /tmp ; then
+        abort "Can't change directory to /tmp"
+    fi
+
+    # Pytorch
+    if ! wget "https://github.com/hcfman/sbts-prereqs/releases/download/sbtq-prereqs_v1.0.0_jetpack_4.6.1/torch-1.10.0a0+git71f889c-cp36-cp36m-linux_aarch64.whl" ; then
+        abort "Can't download torch wheel from github"
+    fi
+
+    if ! python3 -m pip install "./torch-1.10.0a0+git71f889c-cp36-cp36m-linux_aarch64.whl" ; then
+        abort "Can't install torch module"
+    fi
+
+    if ! rm "./torch-1.10.0a0+git71f889c-cp36-cp36m-linux_aarch64.whl" ; then
+        abort "Can't remove installed pytorch wheel"
+    fi
+
+    # Torchvision
+    if ! wget "https://github.com/hcfman/sbts-prereqs/releases/download/sbtq-prereqs_v1.0.0_jetpack_4.6.1/torchvision-0.11.0a0+05eae32-cp36-cp36m-linux_aarch64.whl" ; then
+        abort "Can't download torchvision wheel from github"
+    fi
+
+    if ! python3 -m pip install "./torchvision-0.11.0a0+05eae32-cp36-cp36m-linux_aarch64.whl" ; then
+        abort "Can't install torchvision module"
+    fi
+
+    if ! rm "./torchvision-0.11.0a0+05eae32-cp36-cp36m-linux_aarch64.whl" ; then
+        abort "Can't remove installed pytorch wheel"
+    fi
+
+    # Mish-cuda
+    if ! wget "https://github.com/hcfman/sbts-prereqs/releases/download/sbtq-prereqs_v1.0.0_jetpack_4.6.1/mish_cuda-0.0.3-cp36-cp36m-linux_aarch64.whl" ; then
+        abort "Can't download mish-cuda wheel from github"
+    fi
+
+    if ! python3 -m pip install "./mish_cuda-0.0.3-cp36-cp36m-linux_aarch64.whl" ; then
+        abort "Can't install mish-cuda module"
+    fi
+
+    if ! rm "./mish_cuda-0.0.3-cp36-cp36m-linux_aarch64.whl" ; then
+        abort "Can't remove installed mish-cuda wheel"
     fi
 }
 
@@ -172,8 +269,41 @@ install_python_modules() {
     echo "Installing python modules"
     echo ""
 
-    pip3 install -U setuptools
+    install_module "protobuf"
+    if ! python3 -m pip install --upgrade numpy==1.19.5 ; then
+        abort "Can't install numpy version 1.19.5"
+    fi
 
+    # Modules for pytorch and friends support
+    for m in pillow tqdm; do
+        install_module "$m"
+    done
+
+    if ! python3 -m pip install matplotlib==3.3.4 ; then
+        abort "Can't install matplotlib version 3.3.4"
+    fi
+
+    install_module "pycocotools"
+
+    if ! python3 -m pip install scipy==1.5.4 ; then
+        abort "Can't install scipy version 1.5.4"
+    fi
+
+    if ! python3 -m pip install pandas==1.1.5 ; then
+        abort "Can't install pandas version 1.1.5"
+    fi
+
+    for m in gdown seaborn; do
+        install_module "$m"
+    done
+
+    # pytorch and friends
+    install_extra_wheels
+
+    # Pytorch should be installed first as above
+    install_module "thop"
+
+    # Modules for sbts
     for m in flask requests websockets shapely configparser asyncio aiohttp; do
         install_module "$m"
     done
@@ -322,6 +452,41 @@ install_darknet() {
         abort "Can't copy yolov3.weights from $YOLOV3_WEIGHTS_LOCATION"
     fi
 
+}
+
+install_yolov7() {
+    YOLOV7_URL="https://github.com/WongKinYiu/yolov7.git"
+
+    echo ""
+    echo "Installing yolov7"
+    echo ""
+
+    if [ -e "$SUDO_USER_HOME/yolov7" ] ; then
+        echo "YOLOV7_URL already installed"
+        return
+    fi
+
+    cd "$SUDO_USER_HOME" || abort "Can't change directory to $SUDO_USER_HOME"
+
+    if ! su "$SUDO_USER" -c "git clone \"YOLOV7_URL\" yolov7" ; then
+        abort "Can't clone YOLOV7_URL"
+    fi
+
+    cd "$SUDO_USER_HOME/yolov7" || abort "Can't change to $SUDO_USER_HOME/yolov7"
+
+    mkdir weights
+
+    if ! cd "weights" ; then
+        abort "Can't directory to weights"
+    fi
+
+    if ! wget "https://github.com/WongKinYiu/yolov7/releases/download/v0.1/yolov7-e6e.pt" ; then
+        abort "Can't download https://github.com/WongKinYiu/yolov7/releases/download/v0.1/yolov7-e6e.pt"
+    fi
+
+    if ! wget "https://github.com/WongKinYiu/yolov7/releases/download/v0.1/yolov7-d6.pt" ; then
+        abort "Can't download https://github.com/WongKinYiu/yolov7/releases/download/v0.1/yolov7-d6.pt"
+    fi
 }
 
 install_alexeyab_darknet() {
@@ -878,6 +1043,8 @@ determine_platform_branch
 
 update_pkg_registry
 
+prep_pip_installation
+
 install_packages
 
 set_prefixes
@@ -897,6 +1064,8 @@ migrate_apache2_sites-available
 install_darknet
 
 install_alexeyab_darknet
+
+install_yolov7
 
 download_latests_app_release
 
