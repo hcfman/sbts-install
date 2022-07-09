@@ -219,15 +219,19 @@ install_module() {
     fi
 }
 
+download_file() {
+    if ! wget "$1" ; then
+        abort "Can't download $1"
+    fi
+}
+
 install_extra_wheels() {
     if ! cd /tmp ; then
         abort "Can't change directory to /tmp"
     fi
 
     # Pytorch
-    if ! wget "https://github.com/hcfman/sbts-prereqs/releases/download/sbtq-prereqs_v1.0.0_jetpack_4.6.1/torch-1.10.0a0+git71f889c-cp36-cp36m-linux_aarch64.whl" ; then
-        abort "Can't download torch wheel from github"
-    fi
+    download_file "https://github.com/hcfman/sbts-prereqs/releases/download/sbtq-prereqs_v1.0.0_jetpack_4.6.1/torch-1.10.0a0+git71f889c-cp36-cp36m-linux_aarch64.whl"
 
     if ! python3 -m pip install "./torch-1.10.0a0+git71f889c-cp36-cp36m-linux_aarch64.whl" ; then
         abort "Can't install torch module"
@@ -238,9 +242,7 @@ install_extra_wheels() {
     fi
 
     # Torchvision
-    if ! wget "https://github.com/hcfman/sbts-prereqs/releases/download/sbtq-prereqs_v1.0.0_jetpack_4.6.1/torchvision-0.11.0a0+05eae32-cp36-cp36m-linux_aarch64.whl" ; then
-        abort "Can't download torchvision wheel from github"
-    fi
+    download_file "https://github.com/hcfman/sbts-prereqs/releases/download/sbtq-prereqs_v1.0.0_jetpack_4.6.1/torchvision-0.11.0a0+05eae32-cp36-cp36m-linux_aarch64.whl"
 
     if ! python3 -m pip install "./torchvision-0.11.0a0+05eae32-cp36-cp36m-linux_aarch64.whl" ; then
         abort "Can't install torchvision module"
@@ -251,9 +253,7 @@ install_extra_wheels() {
     fi
 
     # Mish-cuda
-    if ! wget "https://github.com/hcfman/sbts-prereqs/releases/download/sbtq-prereqs_v1.0.0_jetpack_4.6.1/mish_cuda-0.0.3-cp36-cp36m-linux_aarch64.whl" ; then
-        abort "Can't download mish-cuda wheel from github"
-    fi
+    download_file "https://github.com/hcfman/sbts-prereqs/releases/download/sbtq-prereqs_v1.0.0_jetpack_4.6.1/mish_cuda-0.0.3-cp36-cp36m-linux_aarch64.whl"
 
     if ! python3 -m pip install "./mish_cuda-0.0.3-cp36-cp36m-linux_aarch64.whl" ; then
         abort "Can't install mish-cuda module"
@@ -480,13 +480,8 @@ install_yolov7() {
         abort "Can't directory to weights"
     fi
 
-    if ! wget "https://github.com/WongKinYiu/yolov7/releases/download/v0.1/yolov7-e6e.pt" ; then
-        abort "Can't download https://github.com/WongKinYiu/yolov7/releases/download/v0.1/yolov7-e6e.pt"
-    fi
-
-    if ! wget "https://github.com/WongKinYiu/yolov7/releases/download/v0.1/yolov7-d6.pt" ; then
-        abort "Can't download https://github.com/WongKinYiu/yolov7/releases/download/v0.1/yolov7-d6.pt"
-    fi
+    download_file "https://github.com/WongKinYiu/yolov7/releases/download/v0.1/yolov7-e6e.pt"
+    download_file "https://github.com/WongKinYiu/yolov7/releases/download/v0.1/yolov7-d6.pt"
 }
 
 install_alexeyab_darknet() {
