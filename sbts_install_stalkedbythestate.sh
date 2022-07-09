@@ -1220,6 +1220,8 @@ install_darknet
 
 install_alexeyab_darknet
 
+update_bashrc
+
 install_yolov7
 
 install_yolor
