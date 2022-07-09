@@ -468,6 +468,16 @@ has_more_than_4GB() {
     fi
 }
 
+update_bashrc() {
+    if ! echo 'export OPENBLAS_CORETYPE=ARMV8' >> /root/.bashrc ; then
+        abort "Can't update root bashrc for OPENBLAS_CORETYPE variable"
+    fi
+
+    if ! su "$SUDO_USER" -c "echo 'export OPENBLAS_CORETYPE=ARMV8' >> $SUDO_USER_HOME/.bashrc" ; then
+        abort "Can't update $SUDO_USER_HOME/.bashrc for OPENBLAS_CORETYPE variable"
+    fi
+}
+
 install_yolov7() {
     YOLOV7_SBTS_STABLE_COMMIT="9ee1835a7e38254182bdddd46d33484e05d009b7"
     YOLOV7_URL="https://github.com/WongKinYiu/yolov7.git"
