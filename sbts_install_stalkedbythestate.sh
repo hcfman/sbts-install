@@ -225,6 +225,12 @@ download_file() {
     fi
 }
 
+gdown_file() {
+    if ! gdown "https://drive.google.com/uc?id=$1" ; then
+        abort "Can't gdown $1"
+    fi
+}
+
 install_extra_wheels() {
     if ! cd /tmp ; then
         abort "Can't change directory to /tmp"
@@ -463,13 +469,13 @@ has_more_than_4GB() {
 }
 
 install_yolov7() {
+    YOLOV7_SBTS_STABLE_COMMIT="9ee1835a7e38254182bdddd46d33484e05d009b7"
+    YOLOV7_URL="https://github.com/WongKinYiu/yolov7.git"
+
     # This needs around 4GB of resident memory to run
     if ! has_more_than_4GB ; then
         return
     fi
-
-    YOLOV7_SBTS_STABLE_COMMIT="9ee1835a7e38254182bdddd46d33484e05d009b7"
-    YOLOV7_URL="https://github.com/WongKinYiu/yolov7.git"
 
     echo ""
     echo "Installing yolov7"
@@ -510,6 +516,64 @@ install_yolov7() {
     download_file "https://github.com/WongKinYiu/yolov7/releases/download/v0.1/yolov7-w6.pt"
     download_file "https://github.com/WongKinYiu/yolov7/releases/download/v0.1/yolov7x.pt"
     download_file "https://github.com/WongKinYiu/yolov7/releases/download/v0.1/yolov7.pt"
+}
+
+install_yolor() {
+    YOLOR_SBTS_STABLE_COMMIT="be7da6eba2f612a15bf462951d3cdde66755a180"
+    YOLOR_URL="https://github.com/WongKinYiu/yolor.git"
+
+    # This needs around 4GB of resident memory to run
+    if ! has_more_than_4GB ; then
+        return
+    fi
+
+    echo ""
+    echo "Installing yolor"
+    echo ""
+
+    if [ -e "$SUDO_USER_HOME/yolor-paper" ] ; then
+        echo "YOLOR_URL already installed"
+        return
+    fi
+
+    cd "$SUDO_USER_HOME" || abort "Can't change directory to $SUDO_USER_HOME"
+
+    if ! su "$SUDO_USER" -c "git clone \"$YOLOR_URL\" yolor-paper" ; then
+        abort "Can't clone YOLOR_URL"
+    fi
+
+    cd "$SUDO_USER_HOME/yolor-paper" || abort "Can't change to $SUDO_USER_HOME/yolor-paper"
+
+    if ! su "$SUDO_USER" -c "git checkout paper" ; then
+        abort "Can't checkout yolor paper branch"
+    fi
+
+    # Stable with sbts code
+    if ! su "$SUDO_USER" -c "git checkout \"$YOLOR_SBTS_STABLE_COMMIT\"" ; then
+        abort "Can't checkout SBTS stable commit for yolor"
+    fi
+
+    if [ ! -d "inference" ] ; then
+        if ! su "$SUDO_USER" -c "mkdir inference" ; then
+            abort "Can't create inference directory"
+        fi
+    fi
+
+    migrate_sbts_dir "$SUDO_USER_HOME/yolor/inference" "$SUDO_USER_HOME/disk/yolor"
+
+    mkdir weights
+    if ! cd "weights" ; then
+        abort "Can't directory to weights"
+    fi
+
+    # yolor-d6.pt
+    gdown_file "1WX33ymg_XJLUJdoSf5oUYGHAtpSG2gj8"
+    # yolor-p6.pt
+    gdown_file "1WyzcN1-I0n8BoeRhi_xVt8C5msqdx_7k"
+    # yolor-w6.pt
+    gdown_file "1KnkBzNxATKK8AiDXrW_qF-vRNOsICV0B"
+    # yolor-e6.pt
+    gdown_file "1jVrq8R1TA60XTUEqqljxAPlt0M_MAGC8"
 }
 
 install_alexeyab_darknet() {
@@ -1089,6 +1153,8 @@ install_darknet
 install_alexeyab_darknet
 
 install_yolov7
+
+install_yolor
 
 download_latests_app_release
 
