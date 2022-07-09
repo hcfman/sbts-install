@@ -576,6 +576,64 @@ install_yolor() {
     gdown_file "1jVrq8R1TA60XTUEqqljxAPlt0M_MAGC8"
 }
 
+
+install_scaled_yolov4() {
+    SCALED_YOLOV4_SBTS_STABLE_COMMIT="676800364a3446900b9e8407bc880ea2127b3415"
+    SCALED_YOLOV4_URL="https://github.com/WongKinYiu/ScaledYOLOv4.git"
+    SCALED_YOLOV4_DIR="ScaledYOLOv4-large"
+
+    # This needs around 4GB of resident memory to run
+    if ! has_more_than_4GB ; then
+        return
+    fi
+
+    echo ""
+    echo "Installing scaled_yolov4"
+    echo ""
+
+    if [ -e "$SUDO_USER_HOME/$SCALED_YOLOV4_DIR" ] ; then
+        echo "SCALED_YOLOV4_URL already installed"
+        return
+    fi
+
+    cd "$SUDO_USER_HOME" || abort "Can't change directory to $SUDO_USER_HOME"
+
+    if ! su "$SUDO_USER" -c "git clone \"$SCALED_YOLOV4_URL\" $SCALED_YOLOV4_DIR" ; then
+        abort "Can't clone SCALED_YOLOV4_URL"
+    fi
+
+    cd "$SUDO_USER_HOME/$SCALED_YOLOV4_DIR" || abort "Can't change to $SUDO_USER_HOME/$SCALED_YOLOV4_DIR"
+
+    if ! su "$SUDO_USER" -c "git checkout yolov4-large" ; then
+        abort "Can't checkout scaled_yolov4 yolov4-large branch"
+    fi
+
+    # Stable with sbts code
+    if ! su "$SUDO_USER" -c "git checkout \"$SCALED_YOLOV4_SBTS_STABLE_COMMIT\"" ; then
+        abort "Can't checkout SBTS stable commit for scaled_yolov4"
+    fi
+
+    if [ ! -d "inference" ] ; then
+        if ! su "$SUDO_USER" -c "mkdir inference" ; then
+            abort "Can't create inference directory"
+        fi
+    fi
+
+    migrate_sbts_dir "$SUDO_USER_HOME/$SCALED_YOLOV4_DIR/inference" "$SUDO_USER_HOME/disk/scaled_yolov4"
+
+    mkdir weights
+    if ! cd "weights" ; then
+        abort "Can't directory to weights"
+    fi
+
+    # yolov4-p7.pt
+    gdown_file "18fGlzgEJTkUEiBG4hW00pyedJKNnYLP3"
+    # yolov4-p6.pt
+    gdown_file "1aB7May8oPYzBqbgwYSZHuATPXyxh9xnf"
+    # yolov4-p5.pt
+    gdown_file "1aXZZE999sHMP1gev60XhNChtHPRMH3Fz"
+}
+
 install_alexeyab_darknet() {
     ALEXEYAB_DARKNET="https://github.com/AlexeyAB/darknet.git"
     ALEXEYAB_WORKING_COMMIT="64efa721ede91cd8ccc18257f98eeba43b73a6af"
@@ -1155,6 +1213,8 @@ install_alexeyab_darknet
 install_yolov7
 
 install_yolor
+
+install_scaled_yolov4
 
 download_latests_app_release
 
