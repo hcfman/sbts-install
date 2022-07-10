@@ -121,7 +121,6 @@ def initialize():
     if half:
         model.half()  # to FP16
 
-    # Set Dataloader
     # Get names
     names = model.module.names if hasattr(model, 'module') else model.names
 
