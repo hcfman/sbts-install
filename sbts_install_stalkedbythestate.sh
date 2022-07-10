@@ -513,7 +513,7 @@ install_yolov7() {
         abort "Can't create runs directory"
     fi
 
-    migrate_sbts_dir "$SUDO_USER_HOME/yolov7/runs" "$SUDO_USER_HOME/disk/yolov7"
+    migrate_dir_to_disk "$SUDO_USER_HOME/yolov7/runs" "$SUDO_USER_HOME/disk/yolov7"
 
     mkdir weights
     if ! cd "weights" ; then
@@ -570,7 +570,7 @@ install_yolor() {
         fi
     fi
 
-    migrate_sbts_dir "$SUDO_USER_HOME/$SCALED_YOLOV4_DIR/inference" "$SUDO_USER_HOME/disk/$SCALED_YOLOV4_DIR"
+    migrate_dir_to_disk "$SUDO_USER_HOME/$SCALED_YOLOV4_DIR/inference" "$SUDO_USER_HOME/disk/$SCALED_YOLOV4_DIR"
 
     mkdir weights
     if ! cd "weights" ; then
@@ -630,7 +630,7 @@ install_scaled_yolov4() {
         fi
     fi
 
-    migrate_sbts_dir "$SUDO_USER_HOME/$SCALED_YOLOV4_DIR/inference" "$SUDO_USER_HOME/disk/scaled_yolov4"
+    migrate_dir_to_disk "$SUDO_USER_HOME/$SCALED_YOLOV4_DIR/inference" "$SUDO_USER_HOME/disk/scaled_yolov4"
 
     mkdir weights
     if ! cd "weights" ; then
@@ -643,6 +643,12 @@ install_scaled_yolov4() {
     gdown_file "1aB7May8oPYzBqbgwYSZHuATPXyxh9xnf"
     # yolov4-p5.pt
     gdown_file "1aXZZE999sHMP1gev60XhNChtHPRMH3Fz"
+}
+
+create_tmp_in_disk() {
+    mkdir "$SUDO_USER_HOME/disk/tmp" || abort "Can't create tmp in $SUDO_USER_HOME"
+    chmod 777 "$SUDO_USER_HOME/disk/tmp" || abort "Can't change mode on $SUDO_USER_HOME/disk/tmp"
+    chmod +t "$SUDO_USER_HOME/disk/tmp" || abort "Can't change mode on $SUDO_USER_HOME/disk/tmp"
 }
 
 install_alexeyab_darknet() {
@@ -718,7 +724,7 @@ install_alexeyab_darknet() {
     fi
 }
 
-migrate_sbts_dir() {
+migrate_dir_to_disk() {
     local source=$1
     local target=$2
 
@@ -865,15 +871,15 @@ install_tomcat() {
 
     TOMCAT_VERSION=$(echo "$SUDO_USER_HOME"/app/tomcat/apache-tomcat-* | sed -e 's/.*apache-tomcat-//')
 
-    migrate_sbts_dir "$SUDO_USER_HOME/app/tomcat/apache-tomcat-${TOMCAT_VERSION}/conf" "$SUDO_USER_HOME/config/tomcat"
-    migrate_sbts_dir "$SUDO_USER_HOME/app/tomcat/apache-tomcat-${TOMCAT_VERSION}/logs" "$SUDO_USER_HOME/disk/tomcat"
+    migrate_dir_to_disk "$SUDO_USER_HOME/app/tomcat/apache-tomcat-${TOMCAT_VERSION}/conf" "$SUDO_USER_HOME/config/tomcat"
+    migrate_dir_to_disk "$SUDO_USER_HOME/app/tomcat/apache-tomcat-${TOMCAT_VERSION}/logs" "$SUDO_USER_HOME/disk/tomcat"
 }
 
 move_disk_to_disk_partition() {
-    migrate_sbts_dir "$SUDO_USER_HOME/app/disk" "$SUDO_USER_HOME/disk/sbts"
-    migrate_sbts_dir "$SUDO_USER_HOME/app/conf" "$SUDO_USER_HOME/config/sbts"
-    migrate_sbts_dir "$SUDO_USER_HOME/app/certs" "$SUDO_USER_HOME/config/sbts"
-    migrate_sbts_dir "$SUDO_USER_HOME/app/cacerts" "$SUDO_USER_HOME/config/sbts"
+    migrate_dir_to_disk "$SUDO_USER_HOME/app/disk" "$SUDO_USER_HOME/disk/sbts"
+    migrate_dir_to_disk "$SUDO_USER_HOME/app/conf" "$SUDO_USER_HOME/config/sbts"
+    migrate_dir_to_disk "$SUDO_USER_HOME/app/certs" "$SUDO_USER_HOME/config/sbts"
+    migrate_dir_to_disk "$SUDO_USER_HOME/app/cacerts" "$SUDO_USER_HOME/config/sbts"
 
     if [ ! -d "$SUDO_USER_HOME/disk/log" ] ; then
         mkdir "$SUDO_USER_HOME/disk/log" || abort "Can't create $SUDO_USER_HOME/disk/log"
@@ -1228,6 +1234,8 @@ install_yolov7
 install_yolor
 
 install_scaled_yolov4
+
+create_tmp_in_disk
 
 download_latests_app_release
 
