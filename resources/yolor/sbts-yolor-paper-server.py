@@ -1,10 +1,11 @@
-#!/data1/home/kim/virtualenvs/pytorch/bin/python3
+#!/usr/bin/python3
 
 import argparse
 import asyncio
 import cv2
 import json
 import sys
+import time
 
 import numpy as np
 import torch
@@ -15,8 +16,7 @@ from utils.general import (
     check_img_size, non_max_suppression, scale_coords, xyxy2xywh)
 from utils.torch_utils import select_device, time_synchronized
 
-
-def letterbox(img, new_shape=(640, 640), color=(114, 114, 114), auto=True, scaleFill=False, scaleup=True):
+def letterbox(img, new_shape=(640, 640), color=(114, 114, 114), auto=True, scaleFill=False, scaleup=True, auto_size=32):
     # Resize image to a 32-pixel-multiple rectangle https://github.com/ultralytics/yolov3/issues/232
     shape = img.shape[:2]  # current shape [height, width]
     if isinstance(new_shape, int):
@@ -32,7 +32,7 @@ def letterbox(img, new_shape=(640, 640), color=(114, 114, 114), auto=True, scale
     new_unpad = int(round(shape[1] * r)), int(round(shape[0] * r))
     dw, dh = new_shape[1] - new_unpad[0], new_shape[0] - new_unpad[1]  # wh padding
     if auto:  # minimum rectangle
-        dw, dh = np.mod(dw, 128), np.mod(dh, 128)  # wh padding
+        dw, dh = np.mod(dw, auto_size), np.mod(dh, auto_size)  # wh padding
     elif scaleFill:  # stretch
         dw, dh = 0.0, 0.0
         new_unpad = (new_shape[1], new_shape[0])
@@ -64,7 +64,7 @@ async def server_me(websocket, path):
             im0 = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
 
             # Copied from utils/datasets LoadImages
-            img = letterbox(im0, new_shape=640)[0]
+            img = letterbox(im0, new_shape=640, auto_size=64)[0]
 
             # Convert
             img = img[:, :, ::-1].transpose(2, 0, 1)  # BGR to RGB, to 3x416x416
@@ -77,13 +77,13 @@ async def server_me(websocket, path):
                 img = img.unsqueeze(0)
 
             # Inference
-            oldTime = time_synchronized()
+            oldTime = time.time()
             pred = model(img, augment=opt.augment)[0]
 
             # Apply NMS
             pred = non_max_suppression(pred, opt.conf_thres, opt.iou_thres, classes=opt.classes,
                                        agnostic=opt.agnostic_nms)
-            newTime = time_synchronized()
+            newTime = time.time()
 
             for i, det in enumerate(pred):
                 if det is not None and len(det):

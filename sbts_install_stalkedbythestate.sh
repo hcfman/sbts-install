@@ -479,7 +479,7 @@ has_more_than_4GB() {
 }
 
 install_yolov7() {
-    YOLOV7_SBTS_STABLE_COMMIT="9ee1835a7e38254182bdddd46d33484e05d009b7"
+    YOLOV7_SBTS_STABLE_COMMIT="8fb51236492095eb55ea426ffdeb943f46f17289"
     YOLOV7_URL="https://github.com/WongKinYiu/yolov7.git"
 
     # This needs around 4GB of resident memory to run
@@ -505,7 +505,7 @@ install_yolov7() {
     cd "$SUDO_USER_HOME/yolov7" || abort "Can't change to $SUDO_USER_HOME/yolov7"
 
     # Stable with sbts code
-    if ! su "$SUDO_USER" -c "git checkout \"$YOLOV7_SBTS_STABLE_COMMIT\"" ; then
+    if ! su "$SUDO_USER" -c "git checkout --detach \"$YOLOV7_SBTS_STABLE_COMMIT\"" ; then
         abort "Can't checkout SBTS stable commit for yolov7"
     fi
 
@@ -560,7 +560,7 @@ install_yolor() {
     fi
 
     # Stable with sbts code
-    if ! su "$SUDO_USER" -c "git checkout \"$YOLOR_SBTS_STABLE_COMMIT\"" ; then
+    if ! su "$SUDO_USER" -c "git checkout --detach \"$YOLOR_SBTS_STABLE_COMMIT\"" ; then
         abort "Can't checkout SBTS stable commit for yolor"
     fi
 
@@ -620,7 +620,7 @@ install_scaled_yolov4() {
     fi
 
     # Stable with sbts code
-    if ! su "$SUDO_USER" -c "git checkout \"$SCALED_YOLOV4_SBTS_STABLE_COMMIT\"" ; then
+    if ! su "$SUDO_USER" -c "git checkout --detach \"$SCALED_YOLOV4_SBTS_STABLE_COMMIT\"" ; then
         abort "Can't checkout SBTS stable commit for scaled_yolov4"
     fi
 

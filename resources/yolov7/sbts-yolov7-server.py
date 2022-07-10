@@ -10,14 +10,14 @@ import time
 import numpy as np
 import torch
 import websockets
+
 from models.experimental import attempt_load
 from utils.general import (
     check_img_size, non_max_suppression, scale_coords, xyxy2xywh)
 from utils.torch_utils import select_device, time_synchronized
 
-
-def letterbox(img, new_shape=(640, 640), color=(114, 114, 114), auto=True, scaleFill=False, scaleup=True):
-    # Resize image to a 32-pixel-multiple rectangle https://github.com/ultralytics/yolov3/issues/232
+def letterbox(img, new_shape=(640, 640), color=(114, 114, 114), auto=True, scaleFill=False, scaleup=True, stride=32):
+    # Resize and pad image while meeting stride-multiple constraints
     shape = img.shape[:2]  # current shape [height, width]
     if isinstance(new_shape, int):
         new_shape = (new_shape, new_shape)
@@ -32,7 +32,7 @@ def letterbox(img, new_shape=(640, 640), color=(114, 114, 114), auto=True, scale
     new_unpad = int(round(shape[1] * r)), int(round(shape[0] * r))
     dw, dh = new_shape[1] - new_unpad[0], new_shape[0] - new_unpad[1]  # wh padding
     if auto:  # minimum rectangle
-        dw, dh = np.mod(dw, 128), np.mod(dh, 128)  # wh padding
+        dw, dh = np.mod(dw, stride), np.mod(dh, stride)  # wh padding
     elif scaleFill:  # stretch
         dw, dh = 0.0, 0.0
         new_unpad = (new_shape[1], new_shape[0])
@@ -63,7 +63,13 @@ async def server_me(websocket, path):
             nparr = np.frombuffer(blob_data, np.uint8)
             im0 = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
 
-            img = letterbox(im0, new_shape=640)[0]
+            # Start KIM
+            stride = int(model.stride.max())  # model stride
+            imgsz = check_img_size(imgsz, s=stride)  # check img_size
+            # End KIM
+
+            # Copied from utils/datasets LoadImages
+            img = letterbox(im0, imgsz, stride=stride)[0]
 
             # Convert
             img = img[:, :, ::-1].transpose(2, 0, 1)  # BGR to RGB, to 3x416x416
@@ -92,6 +98,7 @@ async def server_me(websocket, path):
                         xywh = (xyxy2xywh(torch.tensor(xyxy).view(1, 4))).view(-1).tolist()  # normalized xywh
                         newPiece = [names[int(cls)], conf.item() , xywh]
                         new_rlist.append(tuple(newPiece))
+
         except Exception as e:
             new_rlist = []
             print("Caught exception converting image: {0} {1}".format(type(e).__name__, str(e)))
@@ -125,16 +132,16 @@ def initialize():
     names = model.module.names if hasattr(model, 'module') else model.names
 
     # Run inference
-    img = torch.zeros((1, 3, imgsz, imgsz), device=device)  # init img
-    _ = model(img.half() if half else img) if device.type != 'cpu' else None  # run once
+    if device.type != 'cpu':
+        model(torch.zeros(1, 3, imgsz, imgsz).to(device).type_as(next(model.parameters())))  # run once
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--weights', nargs='+', type=str, default='yolov4-p5.pt', help='model.pt path(s)')
+    parser.add_argument('--weights', nargs='+', type=str, default='yolor-p6.pt', help='model.pt path(s)')
     parser.add_argument('--source', type=str, default='inference/images', help='source')  # file/folder, 0 for webcam
     parser.add_argument('--img-size', type=int, default=640, help='inference size (pixels)')
-    parser.add_argument('--conf-thres', type=float, default=0.4, help='object confidence threshold')
-    parser.add_argument('--iou-thres', type=float, default=0.5, help='IOU threshold for NMS')
+    parser.add_argument('--conf-thres', type=float, default=0.25, help='object confidence threshold')
+    parser.add_argument('--iou-thres', type=float, default=0.45, help='IOU threshold for NMS')
     parser.add_argument('--device', default='', help='cuda device, i.e. 0 or 0,1,2,3 or cpu')
     parser.add_argument('--view-img', action='store_true', help='display results')
     parser.add_argument('--save-txt', action='store_true', help='save results to *.txt')
