@@ -898,7 +898,7 @@ move_disk_to_disk_partition() {
 }
 
 install_secure_config() {
-    if ! sudo -H -u "$SUDO_USER" cp -r resources/secure/$1 "$SUDO_USER_HOME/config/secure/resources" ; then
+    if ! sudo -H -u "$SUDO_USER" cp -r "resources/secure/$1" "$SUDO_USER_HOME/config/secure/resources" ; then
         abort "Can't install $1 to $SUDO_USER_HOME/config/secure/resources"
     fi
 }
@@ -980,16 +980,19 @@ install_secure() {
 
     # Set the recommended models configuration for the platform
     local RESOURCES_LOCATION="$SUDO_USER_HOME/config/secure/resources"
+    cd "$RESOURCES_LOCATION" || abort "Can't change to $RESOURCES_LOCATION"
     if has_more_than_8GB ; then
         # AGX or other 16GB or higher versions
-        sudo -H -u "$SUDO_USER" cd "$RESOURCES_LOCATION" || abort "Can't change to $RESOURCES_LOCATION;ln -s multi_model_yolov7_yolov4_config.json config.json"
+        sudo -H -u "$SUDO_USER" ln -s multi_model_yolov7_yolov4_config.json config.json
     elif has_more_than_4GB ; then
         # NX or other 8GB versions
-        sudo -H -u "$SUDO_USER" cd "$RESOURCES_LOCATION" || abort "Can't change to $RESOURCES_LOCATION;ln -s single_model_yolov7.json config.json"
+        sudo -H -u "$SUDO_USER" ln -s single_model_yolov7.json config.json
     else
         # Nano
-        sudo -H -u "$SUDO_USER" cd "$RESOURCES_LOCATION" || abort "Can't change to $RESOURCES_LOCATION;ln -s single_model_yolov4.json config.json"
+        sudo -H -u "$SUDO_USER" ln -s single_model_yolov4.json config.json
     fi
+
+    cd "$HERE" || abort "Can't change back to $HERE"
 }
 
 determine_partition_base() {
