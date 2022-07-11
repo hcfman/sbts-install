@@ -220,7 +220,7 @@ install_module() {
 }
 
 download_file() {
-    if ! wget "$1" ; then
+    if ! sudo -H -u "$SUDO_USER" wget "$1" ; then
         abort "Can't download $1"
     fi
 }
@@ -520,7 +520,7 @@ migrate_dir_to_disk() {
             abort "Could not move $source to $target"
         fi
 
-        if ! ln -s "$target/$source_dir_part" "$source" ; then
+        if ! sudo -H -u "$SUDO_USER" ln -s "$target/$source_dir_part" "$source" ; then
             abort "Could not make a symlink from $target/$source_dir_part to $source"
         fi
     fi
@@ -564,7 +564,8 @@ install_yolov7() {
 
     migrate_dir_to_disk "$SUDO_USER_HOME/$YOLOV7_DIR/runs" "$SUDO_USER_HOME/disk/$YOLOV7_DIR"
 
-    mkdir weights
+    sudo -H -u "$SUDO_USER" mkdir weights || abort "Can't create weights directory"
+
     if ! cd "weights" ; then
         abort "Can't directory to weights"
     fi
@@ -626,7 +627,8 @@ install_yolor() {
 
     migrate_dir_to_disk "$SUDO_USER_HOME/$YOLOR_DIR/inference" "$SUDO_USER_HOME/disk/$YOLOR_DIR"
 
-    mkdir weights
+    sudo -H -u "$SUDO_USER" mkdir weights || abort "Can't create weights directory"
+
     if ! cd "weights" ; then
         abort "Can't directory to weights"
     fi
