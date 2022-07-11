@@ -670,18 +670,18 @@ install_scaled_yolov4() {
 
     cd "$SUDO_USER_HOME" || abort "Can't change directory to $SUDO_USER_HOME"
 
-    if ! su "$SUDO_USER" -c "git clone \"$SCALED_YOLOV4_URL\" $SCALED_YOLOV4_DIR" ; then
+    if ! sudo -H -u "$SUDO_USER" git clone "$SCALED_YOLOV4_URL" "$SCALED_YOLOV4_DIR" ; then
         abort "Can't clone SCALED_YOLOV4_URL"
     fi
 
     cd "$SUDO_USER_HOME/$SCALED_YOLOV4_DIR" || abort "Can't change to $SUDO_USER_HOME/$SCALED_YOLOV4_DIR"
 
-    if ! su "$SUDO_USER" -c "git checkout yolov4-large" ; then
+    if ! sudo -H -u "$SUDO_USER" git checkout yolov4-large ; then
         abort "Can't checkout scaled_yolov4 yolov4-large branch"
     fi
 
     # Stable with sbts code
-    if ! su "$SUDO_USER" -c "git checkout --detach \"$SCALED_YOLOV4_SBTS_STABLE_COMMIT\"" ; then
+    if ! sudo -H -u "$SUDO_USER" git checkout --detach "$SCALED_YOLOV4_SBTS_STABLE_COMMIT" ; then
         abort "Can't checkout SBTS stable commit for scaled_yolov4"
     fi
 
@@ -693,7 +693,7 @@ install_scaled_yolov4() {
 
     migrate_dir_to_disk "$SUDO_USER_HOME/$SCALED_YOLOV4_DIR/inference" "$SUDO_USER_HOME/disk/scaled_yolov4"
 
-    mkdir weights
+    sudo -H -u "$SUDO_USER" mkdir weights
     if ! cd "weights" ; then
         abort "Can't directory to weights"
     fi
