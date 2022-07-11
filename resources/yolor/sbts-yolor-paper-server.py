@@ -16,7 +16,7 @@ from utils.general import (
     check_img_size, non_max_suppression, scale_coords, xyxy2xywh)
 from utils.torch_utils import select_device, time_synchronized
 
-def letterbox(img, new_shape=(640, 640), color=(114, 114, 114), auto=True, scaleFill=False, scaleup=False, auto_size=32):
+def letterbox(img, new_shape=(640, 640), color=(114, 114, 114), auto=True, scaleFill=False, scaleup=True, auto_size=32):
     # Resize image to a 32-pixel-multiple rectangle https://github.com/ultralytics/yolov3/issues/232
     shape = img.shape[:2]  # current shape [height, width]
     if isinstance(new_shape, int):
