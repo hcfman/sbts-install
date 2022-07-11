@@ -906,7 +906,7 @@ install_secure_config() {
 install_secure() {
     cd "$HERE" || abort "Can't change back to $HERE"
 
-    if [ -f "$SUDO_USER_HOME/config/secure/resources/config.json" -a -d "$SUDO_USER_HOME/config/secure/resources" ] ; then
+    if [ -e "$SUDO_USER_HOME/config/secure/resources/config.json" -a -d "$SUDO_USER_HOME/config/secure/resources" ] ; then
         return
     fi
 
