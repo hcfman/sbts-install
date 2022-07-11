@@ -1,0 +1,198 @@
+{
+  "modelList": {
+    "yolov7": {
+      "url": "ws://127.0.0.1:8769"
+    }
+  },
+  "cameraList": [
+    {
+      "name": "Front",
+      "enabled": true,
+      "url": "http://127.0.0.1:8100/front/video.jpg",
+      "username": "santa",
+      "password": "youtube",
+      "polygonDict": {
+        "Far": [{"x": 2, "y": 2}, {"x": 638, "y": 3}, {"x": 637, "y": 237}, {"x": 4, "y": 236}],
+        "Close left top": [{"x": 2, "y": 239}, {"x": 316, "y": 241}, {"x": 318, "y": 357}, {"x": 3, "y": 356}],
+        "Close left bottom": [{"x": 2, "y": 361}, {"x": 317, "y": 363}, {"x": 317, "y": 477}, {"x": 2, "y": 476}],
+        "False alert area": [{"x": 11, "y": 434}, {"x": 50, "y": 431}, {"x": 51, "y": 464}, {"x": 12, "y": 464}],
+        "Close right": [{"x": 320, "y": 241}, {"x": 637, "y": 243}, {"x": 638, "y": 477}, {"x": 322, "y": 475}]
+      },
+      "notifyList": [
+        {
+          "name": "Far",
+          "zoneList": [
+            {
+              "name": "Far zone",
+              "includeList": [
+                {
+                  "name": "Far zone1 include",
+                  "models": [[{
+                      "name": "yolov7",
+                      "category": "person",
+                      "minHeight": 35,
+                      "maxHeight": 570,
+                      "minWidth": 10,
+                      "maxWidth": 200,
+                      "confidence": 0.50,
+                      "advanceSkip": false,
+                      "namedPolygon": "Far"
+                    }]]
+                }
+              ],
+              "excludeList": [
+              ]
+            }
+          ],
+          "url": "http://127.0.0.1:8080/sbts/net",
+          "username": "${admin.user}",
+          "password": "${admin.password}",
+          "method": "POST",
+          "params": {
+            "event": "Far proxy raw on"
+          }
+        },
+        {
+          "name": "Close left",
+          "zoneList": [
+            {
+              "name": "Close left zone",
+              "includeList": [
+                {
+                  "name": "Close left top include",
+                  "models": [[{
+                      "name": "yolov7",
+                      "category": "person",
+                      "minHeight": 35,
+                      "maxHeight": 570,
+                      "minWidth": 10,
+                      "maxWidth": 200,
+                      "confidence": 0.50,
+                      "advanceSkip": false,
+                      "namedPolygon": "Close left top"
+                    }]]
+                },
+                {
+                  "name": "Close left bottom include",
+                  "models": [[{
+                      "name": "yolov7",
+                      "category": "person",
+                      "minHeight": 35,
+                      "maxHeight": 570,
+                      "minWidth": 10,
+                      "maxWidth": 200,
+                      "confidence": 0.50,
+                      "advanceSkip": false,
+                      "namedPolygon": "Close left bottom"
+                    }]]
+                }
+              ],
+              "excludeList": [
+                {
+                  "name": "Close left bottom exclude",
+                  "models": [[{
+                      "name": "yolov7",
+                      "category": "person",
+                      "minHeight": 0,
+                      "maxHeight": 1000,
+                      "minWidth": 0,
+                      "maxWidth": 1000,
+                      "confidence": 0.0,
+                      "advanceSkip": false,
+                      "namedPolygon": "False alert area"
+                    }]]
+                }
+              ]
+            }
+          ],
+          "url": "http://127.0.0.1:8080/sbts/net",
+          "username": "${admin.user}",
+          "password": "${admin.password}",
+          "method": "POST",
+          "params": {
+            "event": "Close left proxy raw on"
+          }
+        },
+        {
+          "name": "Close right",
+          "zoneList": [
+            {
+              "name": "Close right zone",
+              "includeList": [
+                {
+                  "name": "Close right include",
+                  "models": [[{
+                      "name": "yolov7",
+                      "category": "person",
+                      "minHeight": 35,
+                      "maxHeight": 570,
+                      "minWidth": 10,
+                      "maxWidth": 200,
+                      "confidence": 0.50,
+                      "advanceSkip": false,
+                      "namedPolygon": "Close right"
+                    }]]
+                }
+              ],
+              "excludeList": [
+              ]
+            }
+          ],
+          "url": "http://127.0.0.1:8080/sbts/net",
+          "username": "${admin.user}",
+          "password": "${admin.password}",
+          "method": "POST",
+          "params": {
+            "event": "Close right proxy raw on"
+          }
+        }
+      ]
+      },
+    {
+      "name": "Back",
+      "enabled": true,
+      "url": "http://127.0.0.1:8101/back/video.jpg",
+      "username": "santa",
+      "password": "youtube",
+      "polygonDict": {
+        "Back": [{"x": 3, "y": 4}, {"x": 635, "y": 5}, {"x": 634, "y": 477}, {"x": 3, "y": 471}]
+      },
+      "notifyList": [
+        {
+          "name": "Back",
+          "zoneList": [
+            {
+              "name": "Back",
+              "includeList": [
+                {
+                  "name": "Back zone1 include",
+                  "models": [[{
+                      "name": "yolov7",
+                      "category": "person",
+                      "minHeight": 35,
+                      "maxHeight": 570,
+                      "minWidth": 10,
+                      "maxWidth": 200,
+                      "confidence": 0.50,
+                      "advanceSkip": false,
+                      "namedPolygon": "Back",
+                      "counter": 3
+                    }]]
+                }
+              ],
+              "excludeList": [
+              ]
+            }
+          ],
+          "url": "http://127.0.0.1:8080/sbts/net",
+          "username": "${admin.user}",
+          "password": "${admin.password}",
+          "method": "POST",
+          "params": {
+            "event": "Back proxy raw on"
+          }
+        }
+      ]
+      }
+  ]
+}

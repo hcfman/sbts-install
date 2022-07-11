@@ -315,6 +315,7 @@ install_python_modules() {
     done
 }
 
+# Need this export for some versions of numpy to work properly (Not core dump) on arm processors
 update_bashrc() {
     if ! echo 'export OPENBLAS_CORETYPE=ARMV8' >> /root/.bashrc ; then
         abort "Can't update root bashrc for OPENBLAS_CORETYPE variable"
