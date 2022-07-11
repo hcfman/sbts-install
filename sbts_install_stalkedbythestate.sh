@@ -990,14 +990,6 @@ install_secure() {
         # Nano
         sudo -H -u "$SUDO_USER" cd "$RESOURCES_LOCATION" || abort "Can't change to $RESOURCES_LOCATION;ln -s single_model_yolov4.json config.json"
     fi
-
-    if [ "$PLATFORM_LABEL" == "NVIDIA Jetson Nano Developer Kit" ] ; then
-        if grep /config.json "$SUDO_USER_HOME/sbts-secure/start_secure.sh" > /dev/null ; then
-            if ! perl -pi -e "s%/config.json%/nano_config.json%g" "$SUDO_USER_HOME/sbts-secure/start_secure.sh" ; then
-                abort "Can't set the correct config file for the nano"
-            fi
-        fi
-    fi
 }
 
 determine_partition_base() {
@@ -1056,32 +1048,34 @@ systemctl start apache2
 # Choose just one of the below, comment out the ones that are not chosen
 EOF
 
-    case "$PLATFORM_LABEL" in
-        "NVIDIA Jetson Nano Developer Kit")
-            cat >> /etc/rc.local <<EOF
+    if has_more_than_8GB ; then
+        # AGX or other 16GB or higher versions
+        cat >> /etc/rc.local <<EOF
+#su - "${SUDO_USER}" -c "${SUDO_USER_HOME}/darknet/start_sbts_pj_yolov3_server.sh > /dev/null 2>&1 &" &
+#su - "${SUDO_USER}" -c "${SUDO_USER_HOME}/alexyab_darknet/start_sbts_ab_yolov3_server.sh > /dev/null 2>&1 &" &
+su - "${SUDO_USER}" -c "${SUDO_USER_HOME}/alexyab_darknet/start_sbts_ab_yolov4_server.sh > /dev/null 2>&1 &" &
+#su - "${SUDO_USER}" -c "${SUDO_USER_HOME}/scaled_yolov4/start_sbts_scaled_yolov4_server.sh > /dev/null 2>&1 &" &
+#su - "${SUDO_USER}" -c "${SUDO_USER_HOME}/yolor/start_sbts_yolor_server.sh > /dev/null 2>&1 &" &
+su - "${SUDO_USER}" -c "${SUDO_USER_HOME}/yolov7/start_sbts_yolov7_server.sh > /dev/null 2>&1 &" &
+EOF
+    elif has_more_than_4GB ; then
+        # NX or other 8GB versions
+        cat >> /etc/rc.local <<EOF
+#su - "${SUDO_USER}" -c "${SUDO_USER_HOME}/darknet/start_sbts_pj_yolov3_server.sh > /dev/null 2>&1 &" &
+#su - "${SUDO_USER}" -c "${SUDO_USER_HOME}/alexyab_darknet/start_sbts_ab_yolov3_server.sh > /dev/null 2>&1 &" &
+#su - "${SUDO_USER}" -c "${SUDO_USER_HOME}/alexyab_darknet/start_sbts_ab_yolov4_server.sh > /dev/null 2>&1 &" &
+#su - "${SUDO_USER}" -c "${SUDO_USER_HOME}/scaled_yolov4/start_sbts_scaled_yolov4_server.sh > /dev/null 2>&1 &" &
+#su - "${SUDO_USER}" -c "${SUDO_USER_HOME}/yolor/start_sbts_yolor_server.sh > /dev/null 2>&1 &" &
+su - "${SUDO_USER}" -c "${SUDO_USER_HOME}/yolov7/start_sbts_yolov7_server.sh > /dev/null 2>&1 &" &
+EOF
+    else
+        # Nano
+        cat >> /etc/rc.local <<EOF
 #su - "${SUDO_USER}" -c "${SUDO_USER_HOME}/darknet/start_sbts_pj_yolov3_server.sh > /dev/null 2>&1 &" &
 #su - "${SUDO_USER}" -c "${SUDO_USER_HOME}/alexyab_darknet/start_sbts_ab_yolov3_server.sh > /dev/null 2>&1 &" &
 su - "${SUDO_USER}" -c "${SUDO_USER_HOME}/alexyab_darknet/start_sbts_ab_yolov4_server.sh > /dev/null 2>&1 &" &
 EOF
-            ;;
-        "NVIDIA Jetson Xavier NX Developer Kit")
-            cat >> /etc/rc.local <<EOF
-su - "${SUDO_USER}" -c "${SUDO_USER_HOME}/darknet/start_sbts_pj_yolov3_server.sh > /dev/null 2>&1 &" &
-#su - "${SUDO_USER}" -c "${SUDO_USER_HOME}/alexyab_darknet/start_sbts_ab_yolov3_server.sh > /dev/null 2>&1 &" &
-su - "${SUDO_USER}" -c "${SUDO_USER_HOME}/alexyab_darknet/start_sbts_ab_yolov4_server.sh > /dev/null 2>&1 &" &
-EOF
-            ;;
-        "Jetson-AGX")
-            cat >> /etc/rc.local <<EOF
-su - "${SUDO_USER}" -c "${SUDO_USER_HOME}/darknet/start_sbts_pj_yolov3_server.sh > /dev/null 2>&1 &" &
-#su - "${SUDO_USER}" -c "${SUDO_USER_HOME}/alexyab_darknet/start_sbts_ab_yolov3_server.sh > /dev/null 2>&1 &" &
-su - "${SUDO_USER}" -c "${SUDO_USER_HOME}/alexyab_darknet/start_sbts_ab_yolov4_server.sh > /dev/null 2>&1 &" &
-EOF
-            ;;
-        *)
-            abort "Cannot determine the platform type"
-            ;;
-    esac
+    fi
 
     cat >> /etc/rc.local <<EOF
 
