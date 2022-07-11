@@ -644,8 +644,8 @@ install_yolor() {
 
     cd "$HERE" || abort "Can't change back to $HERE"
 
-    copy_to "resources/$YOLOR_DIR/sbts-yolor-paper-server.py" "$SUDO_USER_HOME/$YOLOR_DIR"
-    copy_to "resources/$YOLOR_DIR/start_sbts_yolor_server.sh" "$SUDO_USER_HOME/$YOLOR_DIR"
+    copy_to "resources/yolor/sbts-yolor-paper-server.py" "$SUDO_USER_HOME/$YOLOR_DIR"
+    copy_to "resources/yolor/start_sbts_yolor_server.sh" "$SUDO_USER_HOME/$YOLOR_DIR"
 }
 
 
