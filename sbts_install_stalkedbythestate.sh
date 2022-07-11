@@ -897,15 +897,16 @@ move_disk_to_disk_partition() {
     chown -R "$SUDO_USER:$SUDO_USER" "$SUDO_USER_HOME/disk/log" || abort "Can't chown $SUDO_USER:$SUDO_USER $SUDO_USER_HOME/disk/log"
 }
 
+install_secure_config() {
+    if ! sudo -H -u "$SUDO_USER" cp -r resources/secure/$1 "$SUDO_USER_HOME/config/secure/resources" ; then
+        abort "Can't install $1 to $SUDO_USER_HOME/config/secure/resources"
+    fi
+}
+
 install_secure() {
     cd "$HERE" || abort "Can't change back to $HERE"
 
-    if [ -f "$SUDO_USER_HOME/config/secure/resources/config.json" -a \
-            -f "$SUDO_USER_HOME/config/secure/resources/nano_config.json" -a \
-            -f "$SUDO_USER_HOME/sbts-secure/sbts-secure.py" -a \
-            -f "$SUDO_USER_HOME/sbts-secure/start_secure.sh" -a \
-            -f "" -a -d "$SUDO_USER_HOME/sbts-secure/multi_secureparse" -a \
-            -d "$SUDO_USER_HOME/config/secure/resources" ] ; then
+    if [ -f "$SUDO_USER_HOME/config/secure/resources/config.json" -a -d "$SUDO_USER_HOME/config/secure/resources" ] ; then
         return
     fi
 
@@ -939,13 +940,13 @@ install_secure() {
         abort "Can't chown $SUDO_USER:$SUDO_USER $SUDO_USER_HOME/config/secure/resources"
     fi
 
-    if ! sudo -H -u "$SUDO_USER" cp -r resources/secure/config.json "$SUDO_USER_HOME/config/secure/resources" ; then
-        abort "Can't install config.json to $SUDO_USER_HOME/config/secure/resources"
-    fi
-
-    if ! sudo -H -u "$SUDO_USER" cp -r resources/secure/nano_config.json "$SUDO_USER_HOME/config/secure/resources" ; then
-        abort "Can't install nano_config.json to $SUDO_USER_HOME/config/secure/resources"
-    fi
+    local i
+    for i in single_model_yolov4.json \
+            single_model_yolov7.json \
+            multi_model_yolov7_yolov4_config.json \
+            multi_model_yolov4_yolov3_config.json ; do
+        install_secure_config "$i"
+    done
 
     if [ ! -L "$SUDO_USER_HOME/sbts-secure/resources" ] ; then
         if ! sudo -H -u "$SUDO_USER" ln -s "$SUDO_USER_HOME/config/secure/resources" "$SUDO_USER_HOME/sbts-secure/resources" ; then
@@ -975,6 +976,19 @@ install_secure() {
         if ! perl -pi -e "s%\\\$\\{admin\\.password\\}%${tomcat_password}%g" "$SUDO_USER_HOME/config/secure/resources/nano_config.json" ; then
             abort "Can't alter the tomcat Password nano_config.json"
         fi
+    fi
+
+    # Set the recommended models configuration for the platform
+    local RESOURCES_LOCATION="$SUDO_USER_HOME/config/secure/resources"
+    if has_more_than_8GB ; then
+        # AGX or other 16GB or higher versions
+        sudo -H -u "$SUDO_USER" cd "$RESOURCES_LOCATION" || abort "Can't change to $RESOURCES_LOCATION;ln -s multi_model_yolov7_yolov4_config.json config.json"
+    elif has_more_than_4GB ; then
+        # NX or other 8GB versions
+        sudo -H -u "$SUDO_USER" cd "$RESOURCES_LOCATION" || abort "Can't change to $RESOURCES_LOCATION;ln -s single_model_yolov7.json config.json"
+    else
+        # Nano
+        sudo -H -u "$SUDO_USER" cd "$RESOURCES_LOCATION" || abort "Can't change to $RESOURCES_LOCATION;ln -s single_model_yolov4.json config.json"
     fi
 
     if [ "$PLATFORM_LABEL" == "NVIDIA Jetson Nano Developer Kit" ] ; then
