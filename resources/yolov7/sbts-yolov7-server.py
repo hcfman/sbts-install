@@ -16,7 +16,7 @@ from utils.general import (
     check_img_size, non_max_suppression, scale_coords, xyxy2xywh)
 from utils.torch_utils import select_device, time_synchronized
 
-def letterbox(img, new_shape=(640, 640), color=(114, 114, 114), auto=True, scaleFill=False, scaleup=True, stride=32):
+def letterbox(img, new_shape=(640, 640), color=(114, 114, 114), auto=True, scaleFill=False, scaleup=False, stride=32):
     # Resize and pad image while meeting stride-multiple constraints
     shape = img.shape[:2]  # current shape [height, width]
     if isinstance(new_shape, int):
@@ -69,7 +69,7 @@ async def server_me(websocket, path):
             # End KIM
 
             # Copied from utils/datasets LoadImages
-            img = letterbox(im0, imgsz, stride=stride)[0]
+            img = letterbox(im0, new_shape=imgsz, stride=stride)[0]
 
             # Convert
             img = img[:, :, ::-1].transpose(2, 0, 1)  # BGR to RGB, to 3x416x416

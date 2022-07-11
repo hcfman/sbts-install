@@ -16,7 +16,7 @@ from utils.general import (
 from utils.torch_utils import select_device, time_synchronized
 
 
-def letterbox(img, new_shape=(640, 640), color=(114, 114, 114), auto=True, scaleFill=False, scaleup=True):
+def letterbox(img, new_shape=(640, 640), color=(114, 114, 114), auto=True, scaleFill=False, scaleup=False):
     # Resize image to a 32-pixel-multiple rectangle https://github.com/ultralytics/yolov3/issues/232
     shape = img.shape[:2]  # current shape [height, width]
     if isinstance(new_shape, int):
@@ -63,7 +63,7 @@ async def server_me(websocket, path):
             nparr = np.frombuffer(blob_data, np.uint8)
             im0 = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
 
-            img = letterbox(im0, new_shape=640)[0]
+            img = letterbox(im0, new_shape=imgsz)[0]
 
             # Convert
             img = img[:, :, ::-1].transpose(2, 0, 1)  # BGR to RGB, to 3x416x416
