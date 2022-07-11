@@ -891,8 +891,13 @@ move_disk_to_disk_partition() {
 install_secure() {
     cd "$HERE" || abort "Can't change back to $HERE"
 
-    if [ -f "$SUDO_USER_HOME/config/secure/resources/config.json" -a -f "$SUDO_USER_HOME/config/secure/resources/nano_config.json" -a -f "$SUDO_USER_HOME/sbts-secure/sbts-secure.py" -a -f "$SUDO_USER_HOME/sbts-secure/start_secure.sh" -a -f "" -a -d "$SUDO_USER_HOME/sbts-secure/multi_secureparse" -a -d "$SUDO_USER_HOME/config/secure/resources" ] ; then
-	return
+    if [ -f "$SUDO_USER_HOME/config/secure/resources/config.json" -a \
+            -f "$SUDO_USER_HOME/config/secure/resources/nano_config.json" -a \
+            -f "$SUDO_USER_HOME/sbts-secure/sbts-secure.py" -a \
+            -f "$SUDO_USER_HOME/sbts-secure/start_secure.sh" -a \
+            -f "" -a -d "$SUDO_USER_HOME/sbts-secure/multi_secureparse" -a \
+            -d "$SUDO_USER_HOME/config/secure/resources" ] ; then
+        return
     fi
 
     echo ""
@@ -900,61 +905,67 @@ install_secure() {
     echo ""
 
     if [ ! -d "$SUDO_USER_HOME/sbts-secure" ] ; then
-	sudo -H -u "$SUDO_USER" mkdir "$SUDO_USER_HOME/sbts-secure" || abort "Can't create $SUDO_USER_HOME/sbts-secure"
+      	sudo -H -u "$SUDO_USER" mkdir "$SUDO_USER_HOME/sbts-secure" || abort "Can't create $SUDO_USER_HOME/sbts-secure"
     fi
 
-    if ! sudo -H -u "$SUDO_USER" cp -p -r resources/secure/sbts-secure.py resources/secure/sbts-test.py resources/secure/start_secure.sh resources/secure/multi_secureparse resources/secure/sbts-draw.py resources/secure/sbts-annotate.py resources/secure/vlc_front.sh resources/secure/vlc_back.sh "$SUDO_USER_HOME/sbts-secure" ; then
-	abort "Can't install the \"secure\" program"
+    if ! sudo -H -u "$SUDO_USER" cp -p -r resources/secure/sbts-secure.py resources/secure/sbts-test.py \
+            resources/secure/start_secure.sh \
+            resources/secure/multi_secureparse \
+            resources/secure/sbts-draw.py \
+            resources/secure/sbts-annotate.py \
+            resources/secure/vlc_front.sh \
+            resources/secure/vlc_back.sh "$SUDO_USER_HOME/sbts-secure" ; then
+        abort "Can't install the \"secure\" program"
     fi
 
     if [ ! -d "$SUDO_USER_HOME/config/secure" ] ; then
-	mkdir "$SUDO_USER_HOME/config/secure" || abort "Can't create directory $SUDO_USER_HOME/config/secure"
+        mkdir "$SUDO_USER_HOME/config/secure" || abort "Can't create directory $SUDO_USER_HOME/config/secure"
     fi
 
     if [ ! -d "$SUDO_USER_HOME/config/secure/resources" ] ; then
-	mkdir "$SUDO_USER_HOME/config/secure/resources" || abort "Can't create $SUDO_USER_HOME/config/secure/resources"
+        mkdir "$SUDO_USER_HOME/config/secure/resources" || abort "Can't create $SUDO_USER_HOME/config/secure/resources"
     fi
 
     if ! chown "$SUDO_USER:$SUDO_USER" "$SUDO_USER_HOME/config/secure/resources" ; then
-	abort "Can't chown $SUDO_USER:$SUDO_USER $SUDO_USER_HOME/config/secure/resources"
+        abort "Can't chown $SUDO_USER:$SUDO_USER $SUDO_USER_HOME/config/secure/resources"
     fi
 
     if ! sudo -H -u "$SUDO_USER" cp -r resources/secure/config.json "$SUDO_USER_HOME/config/secure/resources" ; then
-	abort "Can't install config.json to $SUDO_USER_HOME/config/secure/resources"
+        abort "Can't install config.json to $SUDO_USER_HOME/config/secure/resources"
     fi
 
     if ! sudo -H -u "$SUDO_USER" cp -r resources/secure/nano_config.json "$SUDO_USER_HOME/config/secure/resources" ; then
-	abort "Can't install nano_config.json to $SUDO_USER_HOME/config/secure/resources"
+        abort "Can't install nano_config.json to $SUDO_USER_HOME/config/secure/resources"
     fi
 
     if [ ! -L "$SUDO_USER_HOME/sbts-secure/resources" ] ; then
-	if ! sudo -H -u "$SUDO_USER" ln -s "$SUDO_USER_HOME/config/secure/resources" "$SUDO_USER_HOME/sbts-secure/resources" ; then
-	    abort "Can't create symlink from $SUDO_USER_HOME/config/secure/resources to $SUDO_USER_HOME/sbts-secure/resources"
-	fi
+        if ! sudo -H -u "$SUDO_USER" ln -s "$SUDO_USER_HOME/config/secure/resources" "$SUDO_USER_HOME/sbts-secure/resources" ; then
+            abort "Can't create symlink from $SUDO_USER_HOME/config/secure/resources to $SUDO_USER_HOME/sbts-secure/resources"
+        fi
     fi
 
     if fgrep '${admin.user}' "$SUDO_USER_HOME/config/secure/resources/config.json" > /dev/null ; then
-	if ! perl -pi -e "s%\\\$\\{admin\\.user\\}%${tomcat_username}%g" "$SUDO_USER_HOME/config/secure/resources/config.json" ; then
-	    abort "Can't alter the tomcat Username in config.json"
-	fi
+        if ! perl -pi -e "s%\\\$\\{admin\\.user\\}%${tomcat_username}%g" "$SUDO_USER_HOME/config/secure/resources/config.json" ; then
+            abort "Can't alter the tomcat Username in config.json"
+        fi
     fi
 
     if fgrep '${admin.password}' "$SUDO_USER_HOME/config/secure/resources/config.json" > /dev/null ; then
-	if ! perl -pi -e "s%\\\$\\{admin\\.password\\}%${tomcat_password}%g" "$SUDO_USER_HOME/config/secure/resources/config.json" ; then
-	    abort "Can't alter the tomcat Password config.json"
-	fi
+        if ! perl -pi -e "s%\\\$\\{admin\\.password\\}%${tomcat_password}%g" "$SUDO_USER_HOME/config/secure/resources/config.json" ; then
+            abort "Can't alter the tomcat Password config.json"
+        fi
     fi
 
     if fgrep '${admin.user}' "$SUDO_USER_HOME/config/secure/resources/nano_config.json" > /dev/null ; then
-	if ! perl -pi -e "s%\\\$\\{admin\\.user\\}%${tomcat_username}%g" "$SUDO_USER_HOME/config/secure/resources/nano_config.json" ; then
-	    abort "Can't alter the tomcat Username in nano_config.json"
-	fi
+        if ! perl -pi -e "s%\\\$\\{admin\\.user\\}%${tomcat_username}%g" "$SUDO_USER_HOME/config/secure/resources/nano_config.json" ; then
+            abort "Can't alter the tomcat Username in nano_config.json"
+        fi
     fi
 
     if fgrep '${admin.password}' "$SUDO_USER_HOME/config/secure/resources/nano_config.json" > /dev/null ; then
-	if ! perl -pi -e "s%\\\$\\{admin\\.password\\}%${tomcat_password}%g" "$SUDO_USER_HOME/config/secure/resources/nano_config.json" ; then
-	    abort "Can't alter the tomcat Password nano_config.json"
-	fi
+        if ! perl -pi -e "s%\\\$\\{admin\\.password\\}%${tomcat_password}%g" "$SUDO_USER_HOME/config/secure/resources/nano_config.json" ; then
+            abort "Can't alter the tomcat Password nano_config.json"
+        fi
     fi
 
     if [ "$PLATFORM_LABEL" == "NVIDIA Jetson Nano Developer Kit" ] ; then
