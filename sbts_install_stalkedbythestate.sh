@@ -479,6 +479,14 @@ has_more_than_4GB() {
     fi
 }
 
+has_more_than_8GB() {
+    if (( $(fgrep MemTotal /proc/meminfo |awk '{print $2}') > 9000000 )) ; then
+        return 0
+    else
+        return 1
+    fi
+}
+
 install_yolov7() {
     YOLOV7_SBTS_STABLE_COMMIT="8fb51236492095eb55ea426ffdeb943f46f17289"
     YOLOV7_URL="https://github.com/WongKinYiu/yolov7.git"
