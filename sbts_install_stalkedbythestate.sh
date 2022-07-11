@@ -1099,6 +1099,13 @@ disable_gui_for_nano() {
     fi
 }
 
+# The system is fully updated on installation. Automatic updates what work correctly when running with a memory overlay FS
+disable_auto_updates() {
+    if [ -f "/etc/apt/apt.conf.d/10periodic" ] ; then
+        perl -pi -e 's%APT::Periodic::Update-Package-Lists "1";%APT::Periodic::Update-Package-Lists "1";%' "/etc/apt/apt.conf.d/10periodic"
+    fi
+}
+
 make_readonly_and_reboot() {
     if ! "${SUDO_USER_HOME}/sbts-bin/make_readonly.sh" ; then
 	abort "Can't set the system to boot into read-only mode"
@@ -1266,5 +1273,7 @@ install_certbot_again
 disable_docker_again
 
 disable_gui_for_nano
+
+disable_auto_updates
 
 make_readonly_and_reboot
