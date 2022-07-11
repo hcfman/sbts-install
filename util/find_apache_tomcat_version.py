@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 
-# Copyright (c) 2021 Kim Hendrikse
+# Copyright (c) 2022 Kim Hendrikse
 
 import sys
 import re

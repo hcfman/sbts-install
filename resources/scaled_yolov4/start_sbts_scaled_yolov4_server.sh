@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright (c) 2021 Kim Hendrikse
+# Copyright (c) 2022 Kim Hendrikse
 
 abort() {
     echo $* >&2
