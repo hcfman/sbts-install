@@ -707,8 +707,8 @@ install_scaled_yolov4() {
 
     cd "$HERE" || abort "Can't change back to $HERE"
 
-    copy_to "resources/$SCALED_YOLOV4_DIR/sbts-scaled-yolov4-large-server.py" "$SUDO_USER_HOME/$SCALED_YOLOV4_DIR"
-    copy_to "resources/$SCALED_YOLOV4_DIR/start_sbts_scaled_yolov4_server.sh" "$SUDO_USER_HOME/$SCALED_YOLOV4_DIR"
+    copy_to "resources/scaled_yolov4/sbts-scaled-yolov4-large-server.py" "$SUDO_USER_HOME/$SCALED_YOLOV4_DIR"
+    copy_to "resources/scaled_yolov4/start_sbts_scaled_yolov4_server.sh" "$SUDO_USER_HOME/$SCALED_YOLOV4_DIR"
 }
 
 create_tmp_in_disk() {
