@@ -226,7 +226,7 @@ download_file() {
 }
 
 gdown_file() {
-    if ! gdown "https://drive.google.com/uc?id=$1" ; then
+    if ! sudo -H -u "$SUDO_USER" gdown "https://drive.google.com/uc?id=$1" ; then
         abort "Can't gdown $1"
     fi
 }
@@ -487,9 +487,49 @@ has_more_than_8GB() {
     fi
 }
 
+copy_to() {
+    sudo -H -u "$SUDO_USER" cp "$1" "$2" || abort "Can't copy $1 to $2"
+}
+
+make_executable() {
+    chmod +x "$1" || abort "Change set $1 executable"
+}
+
+migrate_dir_to_disk() {
+    local source=$1
+    local target=$2
+
+    local source_dir_part=${source##*/}
+
+    if [ ! -d "$target" ] ; then
+        if ! mkdir "$target" ; then
+            abort "Could not create $target"
+        fi
+    fi
+
+    if [ ! -L "$source" ] ; then
+        echo "Need to make a symlink for $source"
+
+        if [ -d "$target/$source_dir_part" ] ; then
+            if ! rm -rf "$target/$source_dir_part" ; then
+                abort "Could not remove $target/$source_dir_part"
+            fi
+        fi
+
+        if ! mv "$source" "$target" ; then
+            abort "Could not move $source to $target"
+        fi
+
+        if ! ln -s "$target/$source_dir_part" "$source" ; then
+            abort "Could not make a symlink from $target/$source_dir_part to $source"
+        fi
+    fi
+}
+
 install_yolov7() {
     YOLOV7_SBTS_STABLE_COMMIT="8fb51236492095eb55ea426ffdeb943f46f17289"
     YOLOV7_URL="https://github.com/WongKinYiu/yolov7.git"
+    YOLOV7_DIR="yolov7"
 
     # This needs around 4GB of resident memory to run
     if ! has_more_than_4GB ; then
@@ -500,29 +540,29 @@ install_yolov7() {
     echo "Installing yolov7"
     echo ""
 
-    if [ -e "$SUDO_USER_HOME/yolov7" ] ; then
+    if [ -e "$SUDO_USER_HOME/$YOLOV7_DIR" ] ; then
         echo "YOLOV7_URL already installed"
         return
     fi
 
     cd "$SUDO_USER_HOME" || abort "Can't change directory to $SUDO_USER_HOME"
 
-    if ! su "$SUDO_USER" -c "git clone \"$YOLOV7_URL\" yolov7" ; then
+    if ! sudo -H -u "$SUDO_USER" git clone "$YOLOV7_URL" "$YOLOV7_DIR" ; then
         abort "Can't clone YOLOV7_URL"
     fi
 
-    cd "$SUDO_USER_HOME/yolov7" || abort "Can't change to $SUDO_USER_HOME/yolov7"
+    cd "$SUDO_USER_HOME/$YOLOV7_DIR" || abort "Can't change to $SUDO_USER_HOME/$YOLOV7_DIR"
 
     # Stable with sbts code
-    if ! su "$SUDO_USER" -c "git checkout --detach \"$YOLOV7_SBTS_STABLE_COMMIT\"" ; then
+    if ! sudo -H -u "$SUDO_USER" git checkout --detach "$YOLOV7_SBTS_STABLE_COMMIT" ; then
         abort "Can't checkout SBTS stable commit for yolov7"
     fi
 
-    if ! su "$SUDO_USER" -c "mkdir runs" ; then
+    if ! sudo -H -u "$SUDO_USER" mkdir runs ; then
         abort "Can't create runs directory"
     fi
 
-    migrate_dir_to_disk "$SUDO_USER_HOME/yolov7/runs" "$SUDO_USER_HOME/disk/yolov7"
+    migrate_dir_to_disk "$SUDO_USER_HOME/$YOLOV7_DIR/runs" "$SUDO_USER_HOME/disk/$YOLOV7_DIR"
 
     mkdir weights
     if ! cd "weights" ; then
@@ -535,12 +575,17 @@ install_yolov7() {
     download_file "https://github.com/WongKinYiu/yolov7/releases/download/v0.1/yolov7-w6.pt"
     download_file "https://github.com/WongKinYiu/yolov7/releases/download/v0.1/yolov7x.pt"
     download_file "https://github.com/WongKinYiu/yolov7/releases/download/v0.1/yolov7.pt"
+
+    cd "$HERE" || abort "Can't change back to $HERE"
+
+    copy_to "resources/yolov7/sbts-yolov7-server.py" "$SUDO_USER_HOME/$YOLOV7_DIR"
+    copy_to "resources/yolov7/start_sbts_yolov7_server.sh" "$SUDO_USER_HOME/$YOLOV7_DIR"
 }
 
 install_yolor() {
     YOLOR_SBTS_STABLE_COMMIT="be7da6eba2f612a15bf462951d3cdde66755a180"
     YOLOR_URL="https://github.com/WongKinYiu/yolor.git"
-    SCALED_YOLOV4_DIR="yolor-paper"
+    YOLOR_DIR="yolor-paper"
 
     # This needs around 4GB of resident memory to run
     if ! has_more_than_4GB ; then
@@ -551,35 +596,35 @@ install_yolor() {
     echo "Installing yolor"
     echo ""
 
-    if [ -e "$SUDO_USER_HOME/$SCALED_YOLOV4_DIR" ] ; then
+    if [ -e "$SUDO_USER_HOME/$YOLOR_DIR" ] ; then
         echo "YOLOR_URL already installed"
         return
     fi
 
     cd "$SUDO_USER_HOME" || abort "Can't change directory to $SUDO_USER_HOME"
 
-    if ! su "$SUDO_USER" -c "git clone \"$YOLOR_URL\" $SCALED_YOLOV4_DIR" ; then
+    if ! su "$SUDO_USER" -c "git clone \"$YOLOR_URL\" $YOLOR_DIR" ; then
         abort "Can't clone YOLOR_URL"
     fi
 
-    cd "$SUDO_USER_HOME/$SCALED_YOLOV4_DIR" || abort "Can't change to $SUDO_USER_HOME/$SCALED_YOLOV4_DIR"
+    cd "$SUDO_USER_HOME/$YOLOR_DIR" || abort "Can't change to $SUDO_USER_HOME/$YOLOR_DIR"
 
-    if ! su "$SUDO_USER" -c "git checkout paper" ; then
+    if ! sudo -H -u "$SUDO_USER" git checkout paper ; then
         abort "Can't checkout yolor paper branch"
     fi
 
     # Stable with sbts code
-    if ! su "$SUDO_USER" -c "git checkout --detach \"$YOLOR_SBTS_STABLE_COMMIT\"" ; then
+    if ! sudo -H -u "$SUDO_USER" git checkout --detach "$YOLOR_SBTS_STABLE_COMMIT" ; then
         abort "Can't checkout SBTS stable commit for yolor"
     fi
 
     if [ ! -d "inference" ] ; then
-        if ! su "$SUDO_USER" -c "mkdir inference" ; then
+        if ! sudo -H -u "$SUDO_USER" mkdir inference ; then
             abort "Can't create inference directory"
         fi
     fi
 
-    migrate_dir_to_disk "$SUDO_USER_HOME/$SCALED_YOLOV4_DIR/inference" "$SUDO_USER_HOME/disk/$SCALED_YOLOV4_DIR"
+    migrate_dir_to_disk "$SUDO_USER_HOME/$YOLOR_DIR/inference" "$SUDO_USER_HOME/disk/$YOLOR_DIR"
 
     mkdir weights
     if ! cd "weights" ; then
@@ -594,6 +639,11 @@ install_yolor() {
     gdown_file "1KnkBzNxATKK8AiDXrW_qF-vRNOsICV0B"
     # yolor-e6.pt
     gdown_file "1jVrq8R1TA60XTUEqqljxAPlt0M_MAGC8"
+
+    cd "$HERE" || abort "Can't change back to $HERE"
+
+    copy_to "resources/$YOLOR_DIR/sbts-yolor-paper-server.py" "$SUDO_USER_HOME/$YOLOR_DIR"
+    copy_to "resources/$YOLOR_DIR/start_sbts_yolor_server.sh" "$SUDO_USER_HOME/$YOLOR_DIR"
 }
 
 
@@ -652,6 +702,11 @@ install_scaled_yolov4() {
     gdown_file "1aB7May8oPYzBqbgwYSZHuATPXyxh9xnf"
     # yolov4-p5.pt
     gdown_file "1aXZZE999sHMP1gev60XhNChtHPRMH3Fz"
+
+    cd "$HERE" || abort "Can't change back to $HERE"
+
+    copy_to "resources/$SCALED_YOLOV4_DIR/sbts-scaled-yolov4-large-server.py" "$SUDO_USER_HOME/$SCALED_YOLOV4_DIR"
+    copy_to "resources/$SCALED_YOLOV4_DIR/start_sbts_scaled_yolov4_server.sh" "$SUDO_USER_HOME/$SCALED_YOLOV4_DIR"
 }
 
 create_tmp_in_disk() {
@@ -730,37 +785,6 @@ install_alexeyab_darknet() {
     if ! sudo -H -u "$SUDO_USER" wget "$YOLOV4_WEIGHTS_LOCATION" ; then
         cd "$SUDO_USER_HOME" && rm -rf alexyab_darknet
         abort "Can't copy yolov4.weights from $YOLOV4_WEIGHTS_LOCATION"
-    fi
-}
-
-migrate_dir_to_disk() {
-    local source=$1
-    local target=$2
-
-    local source_dir_part=${source##*/}
-
-    if [ ! -d "$target" ] ; then
-        if ! mkdir "$target" ; then
-            abort "Could not create $target"
-        fi
-    fi
-
-    if [ ! -L "$source" ] ; then
-        echo "Need to make a symlink for $source"
-
-        if [ -d "$target/$source_dir_part" ] ; then
-            if ! rm -rf "$target/$source_dir_part" ; then
-                abort "Could not remove $target/$source_dir_part"
-            fi
-        fi
-
-        if ! mv "$source" "$target" ; then
-            abort "Could not move $source to $target"
-        fi
-
-        if ! ln -s "$target/$source_dir_part" "$source" ; then
-            abort "Could not make a symlink from $target/$source_dir_part to $source"
-        fi
     fi
 }
 
