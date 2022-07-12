@@ -1146,6 +1146,13 @@ disable_docker_again() {
     systemctl disable docker.socket
 }
 
+disable_unused_memory_consumers() {
+    systemctl stop containerd
+    systemctl disable containerd
+    systemctl stop whoopsie
+    systemctl disable whoopsie
+}
+
 disable_gui_for_nano() {
     if [ "$PLATFORM_LABEL" == "NVIDIA Jetson Nano Developer Kit" ] ; then
         echo ""
@@ -1328,6 +1335,8 @@ add_crontabs
 install_certbot_again
 
 disable_docker_again
+
+disable_unused_memory_consumers
 
 disable_gui_for_nano
 
