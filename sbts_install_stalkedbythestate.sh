@@ -1127,6 +1127,8 @@ su - "${SUDO_USER}" -c "${SUDO_USER_HOME}/app/bin/start.sh > /dev/null 2>&1 &" &
 
 su - "${SUDO_USER}" -c "${SUDO_USER_HOME}/sbts-secure/start_secure.sh > /dev/null 2>&1 &" &
 
+sleep 15
+
 exit 0
 EOF
     chmod +x /etc/rc.local
