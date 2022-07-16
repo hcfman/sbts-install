@@ -33,7 +33,7 @@ stays read-only till it needs updating. Auto-repair on boot so no hung appliance
 
 ## StalkedByTheState Architecture ##
 
-<img src="docs/images/sbts-arch.drawio.svg">
+<img src="docs/images/sbts-arch.svg">
 
 ## Installation ##
 
