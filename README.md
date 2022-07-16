@@ -41,19 +41,21 @@ stays read-only till it needs updating. Auto-repair on boot so no hung appliance
 
 View the installation in real-time in video here: https://www.youtube.com/watch?v=FrfCRfXJAvw
 
-**First** you need to have installed the sbts-base project from here
+** First**
+
+Disable the gui login:
+
+```
+sudo systemctl set-default multi-user.target; sudo reboot
+```
+
+**Then** you need to have installed the sbts-base project from here
 
 https://github.com/hcfman/sbts-base
 
 The sbts-base project creates partitions on the SSD disk, copies the OS to the SSD and configures the boot to SSD changes.
 
 **Then**:
-
-If you have a Jetson Nano, then you should disable the GUI interface first with:
-
-```
-sudo systemctl set-default multi-user.target; sudo reboot
-```
 
 ```
 git clone https://github.com/hcfman/sbts-install.git
