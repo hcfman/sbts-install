@@ -13,7 +13,7 @@ By system I mean everything.
 
 * Security state machine that records triggered video events. Supports time of day/day of week scheduled events. Watchdog timers,
 rate based triggers, synthetic combination events.
-* multi-model CNN scanner that can use multiple AI models within the same image even. Yolo currently installs yolov4, yolov4, scaled-yolov4, yolor and yolov7 (Chien-Yao Wang, Alexey Bochkovskiy, Hong-Yuan Mark Liao). You
+* multi-model CNN scanner that can use multiple AI models within the same image even. Yolo currently installs **yolov3**, **yolov4**, **scaled-yolov4**, **yolor** and **yolov7** (Chien-Yao Wang, Alexey Bochkovskiy, Hong-Yuan Mark Liao). You
 can choose to use yolov7 in one part of an image, yolov4 in another, or choose to have to triggered confirmed with both.
 Or either... or several more. Classification is done via a network service over a websocket so you can add external models to your appliance
 if you like, or models that are not yolo-like object detectors so long as you provide a websocket wrapper service.
