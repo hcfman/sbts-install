@@ -4,6 +4,8 @@ Installs the latest release of StalkedByTheState on one of NVIDIA Jetson Nano, N
 
 ## StalkedByTheState Architecture ##
 
+<img src="docs/images/sbts-arch.svg">
+
 RTSP from the cameras is transcoded into MJPEG over http for the video alert capture and for reading by sbts-secure.py.
 
 sbts-secure.py reads images from the vlc transcoders in turn and sends the latest image to the object detectors via a websocket connection and receives the result json. This is processed in combination with the configuration that defines the zone polygons and responses and generates triggers to the StalkedByTheState state machine for further processing.
@@ -15,8 +17,6 @@ Real world responses can be generated and read by the USB connected Phidget I/O 
 The system sets up the scripting to maintain auto-renew LetsEncrypt certificates if desired.
 
 The intention is that the whole system runs on top of a read-only mounted memory overlay file system which provides resilients from uncontrolled power cycles.
-
-<img src="docs/images/sbts-arch.svg">
 
 Currently StalkedByTheState installs the following object detectors by default (Based on memory capacity of the platform)
 
