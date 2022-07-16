@@ -30,7 +30,11 @@ self-signed certificates or real ones. Use https internally for device-device co
 * Resilient mode of operation that runs the OS in read-only mode with a read-write memory overlay layer and the configuration
 stays read-only till it needs updating. Auto-repair on boot so no hung appliances (Waiting for keyboard input for repair).
 * Runs off SSD
- 
+
+## Architecture ##
+
+<img src="docs/images/sbts-arch.drawio.svg">
+
 ## Installation ##
 
 **Installs in just a couple of commands**
