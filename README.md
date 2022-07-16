@@ -41,7 +41,7 @@ stays read-only till it needs updating. Auto-repair on boot so no hung appliance
 
 View the installation in real-time in video here: https://www.youtube.com/watch?v=FrfCRfXJAvw
 
-** First**
+**First**
 
 Disable the gui login:
 
