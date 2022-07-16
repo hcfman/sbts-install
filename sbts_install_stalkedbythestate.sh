@@ -1134,10 +1134,10 @@ EOF
     systemctl stop apache2
     systemctl disable apache2
 
-    if grep "^${partition_base_path}1" /etc/fstab > /dev/null || grep "^${partition_base_path}3" /etc/fstab > /dev/null ; then
-	if ! perl -pi -e "s%^${partition_base_path}%#${partition_base_path}%" /etc/fstab ; then
-	    abort "Can't modify /etc/fstab"
-	fi
+    if grep "^${partition_base_path}1" /etc/fstab > /dev/null || grep "^${partition_base_path}4" /etc/fstab > /dev/null ; then
+        if ! perl -pi -e "s%^${partition_base_path}%#${partition_base_path}% if m%^${partition_base_path}[124]%" /etc/fstab ; then
+            abort "Can't modify /etc/fstab"
+        fi
     fi
 }
 
