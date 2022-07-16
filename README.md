@@ -69,6 +69,8 @@ sudo -H ./sbts_install_stalkedbythestate.sh
 
 Answer "No" (The default) to the question relating to automatically restarting the docker daemon. The whole system will be installed and reboot, after which the system will be running the software.
 
+At the moment you have to enter "admin" as the web username. I'll fix this later.
+
 To view the user interface type in:
 
 ```
