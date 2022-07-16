@@ -37,7 +37,6 @@ stays read-only till it needs updating. Auto-repair on boot so no hung appliance
 
 ## Installation ##
 
-
 **Installs in just a couple of commands**
 
 View the installation in real-time in video here: https://www.youtube.com/watch?v=FrfCRfXJAvw
