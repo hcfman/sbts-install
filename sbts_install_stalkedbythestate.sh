@@ -430,6 +430,27 @@ determine_platform_branch() {
     esac
 }
 
+disable_zram_swap() {
+    local i
+
+    echo "Stop zram swap"
+    echo ""
+
+    for i in $(swapon -s|fgrep -i /dev/zram|awk '{print $1}') ; do
+        swapoff "$i"
+    done
+
+    echo "Disable zram swap"
+    echo ""
+    systemctl stop nvzramconfig.service || abort "Can't stop nvzramconfig.service"
+    systemctl disable nvzramconfig.service || abort "Can't disable nvzramconfig.service"
+
+    echo "Current swap"
+    echo ""
+    swapon -s
+    echo ""
+}
+
 install_darknet() {
     PJREDDIE_DARKNET="https://github.com/hcfman/darknet.git"
 
@@ -1065,10 +1086,10 @@ EOF
 
     cat >> /etc/rc.local <<EOF
 fsck -y ${partition_base_path}2
-fsck -y ${partition_base_path}3
+fsck -y ${partition_base_path}4
 
 mount ${partition_base_path}2 ${SUDO_USER_HOME}/config
-mount ${partition_base_path}3 ${SUDO_USER_HOME}/disk
+mount ${partition_base_path}4 ${SUDO_USER_HOME}/disk
 
 systemctl start apache2
 
@@ -1295,6 +1316,8 @@ install_extra_apache2_ssl_config
 migrate_letsencrypt
 
 migrate_apache2_sites-available
+
+disable_zram_swap
 
 install_darknet
 
