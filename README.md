@@ -49,7 +49,9 @@ Disable the gui login:
 sudo systemctl set-default multi-user.target; sudo reboot
 ```
 
-**Then** you need to have installed the sbts-base project from here
+**Then**
+
+Install the sbts-base project from here:
 
 https://github.com/hcfman/sbts-base
 
