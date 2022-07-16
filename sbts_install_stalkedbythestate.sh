@@ -948,6 +948,19 @@ install_secure_config() {
     if ! sudo -H -u "$SUDO_USER" cp -r "resources/secure/$1" "$SUDO_USER_HOME/config/secure/resources" ; then
         abort "Can't install $1 to $SUDO_USER_HOME/config/secure/resources"
     fi
+
+    if fgrep '${admin.user}' "$SUDO_USER_HOME/config/secure/resources/$1" > /dev/null ; then
+        if ! perl -pi -e "s%\\\$\\{admin\\.user\\}%${tomcat_username}%g" "$SUDO_USER_HOME/config/secure/resources/$1" ; then
+            abort "Can't alter the tomcat Username in $1"
+        fi
+    fi
+
+    if fgrep '${admin.password}' "$SUDO_USER_HOME/config/secure/resources/$1" > /dev/null ; then
+        if ! perl -pi -e "s%\\\$\\{admin\\.password\\}%${tomcat_password}%g" "$SUDO_USER_HOME/config/secure/resources/$1" ; then
+            abort "Can't alter the tomcat Password $1"
+        fi
+    fi
+
 }
 
 install_secure() {
@@ -998,30 +1011,6 @@ install_secure() {
     if [ ! -L "$SUDO_USER_HOME/sbts-secure/resources" ] ; then
         if ! sudo -H -u "$SUDO_USER" ln -s "$SUDO_USER_HOME/config/secure/resources" "$SUDO_USER_HOME/sbts-secure/resources" ; then
             abort "Can't create symlink from $SUDO_USER_HOME/config/secure/resources to $SUDO_USER_HOME/sbts-secure/resources"
-        fi
-    fi
-
-    if fgrep '${admin.user}' "$SUDO_USER_HOME/config/secure/resources/config.json" > /dev/null ; then
-        if ! perl -pi -e "s%\\\$\\{admin\\.user\\}%${tomcat_username}%g" "$SUDO_USER_HOME/config/secure/resources/config.json" ; then
-            abort "Can't alter the tomcat Username in config.json"
-        fi
-    fi
-
-    if fgrep '${admin.password}' "$SUDO_USER_HOME/config/secure/resources/config.json" > /dev/null ; then
-        if ! perl -pi -e "s%\\\$\\{admin\\.password\\}%${tomcat_password}%g" "$SUDO_USER_HOME/config/secure/resources/config.json" ; then
-            abort "Can't alter the tomcat Password config.json"
-        fi
-    fi
-
-    if fgrep '${admin.user}' "$SUDO_USER_HOME/config/secure/resources/nano_config.json" > /dev/null ; then
-        if ! perl -pi -e "s%\\\$\\{admin\\.user\\}%${tomcat_username}%g" "$SUDO_USER_HOME/config/secure/resources/nano_config.json" ; then
-            abort "Can't alter the tomcat Username in nano_config.json"
-        fi
-    fi
-
-    if fgrep '${admin.password}' "$SUDO_USER_HOME/config/secure/resources/nano_config.json" > /dev/null ; then
-        if ! perl -pi -e "s%\\\$\\{admin\\.password\\}%${tomcat_password}%g" "$SUDO_USER_HOME/config/secure/resources/nano_config.json" ; then
-            abort "Can't alter the tomcat Password nano_config.json"
         fi
     fi
 
