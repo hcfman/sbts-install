@@ -59,6 +59,8 @@ The sbts-base project creates partitions on the SSD disk, copies the OS to the S
 
 **Then**:
 
+Run the main install script:
+
 ```
 git clone https://github.com/hcfman/sbts-install.git
 cd sbts-install
