@@ -45,6 +45,8 @@ View the installation in real-time in video here: https://www.youtube.com/watch?
 
 https://github.com/hcfman/sbts-base
 
+The sbts-base project creates partitions on the SSD disk, copies the OS to the SSD and configures the boot to SSD changes.
+
 **Then**:
 
 If you have a Jetson Nano, then you should disable the GUI interface first with:
