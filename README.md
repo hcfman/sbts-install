@@ -33,6 +33,7 @@ stays read-only till it needs updating. Auto-repair on boot so no hung appliance
 
 ## StalkedByTheState Architecture ##
 
+
 RTSP from the cameras is transcoded into MJPEG over http for the video alert capture and for reading by sbts-secure.py.
 
 sbts-secure.py reads images from the vlc transcoders in turn and sends the latest image to the object detectors via a websocket connection and receives the result json. This is processed in combination with the configuration that defines the zone polygons and responses and generates triggers to the StalkedByTheState state machine for further processing.
