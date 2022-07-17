@@ -20,11 +20,11 @@ The intention is that the whole system runs on top of a read-only mounted memory
 
 Currently StalkedByTheState installs the following object detectors by default (Based on memory capacity of the platform)
 
-* **YoloV3**
-* **YoloV4**
-* **Scaled-YoloV4**
-* **Yolor**
 * **Yolov7 (Chien-Yao Wang, Alexey Bochkovskiy, Hong-Yuan Mark Liao)**
+* **Yolor**
+* **Scaled-YoloV4**
+* **YoloV4**
+* **YoloV3**
 
 ## Whatis StalkedByTheState ? ##
 
