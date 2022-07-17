@@ -39,11 +39,11 @@ By system I mean everything.
 rate based triggers, synthetic combination events.
 * multi-model CNN scanner that can use multiple AI models within the same image even. You
 can choose to use yolov7 in one part of an image, yolov4 in another, or choose to have to triggered confirmed with both.
-Or either... or several more. Classification is done via a network service over a websocket so you can add external models to your appliance
+Or either... or several more. Object detection is done via a network service over a websocket so you can add external models to your appliance
 if you like, or models that are not yolo-like object detectors so long as you provide a websocket wrapper service.
-* Scanner that reads camera frames, classifies them and then matches them for triggers can be dynamically enabled and disabled, either
+* Scanner that reads camera frames, detects objects and then matches them for triggers can be dynamically enabled and disabled, either
 at the whole camera level or down to a specific notification level
-* Support for auto-review letsencrypt certificates. Can be setup as a reverse proxy to tunnel access to StalkedByTheState
+* Support for auto-renew letsencrypt certificates. Can be setup as a reverse proxy to tunnel access to StalkedByTheState
 and your cameras and other devices over https
 * Elicit a real-world response. Supports out of the box Phidget Interfacekit USB I/O controllers for switching relays or
 reading switches, smoke/carbon monoxide detectors and other wired sensors. Read responses from commonly available remote controls
@@ -66,7 +66,8 @@ View the installation in real-time in video here: https://www.youtube.com/watch?
 Disable the gui login:
 
 ```
-sudo systemctl set-default multi-user.target; sudo reboot
+sudo systemctl set-default multi-user.target
+sudo reboot
 ```
 
 **Then**
