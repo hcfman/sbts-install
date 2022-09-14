@@ -26,7 +26,7 @@ Currently StalkedByTheState installs the following object detectors by default (
 * **[YoloV4](https://github.com/AlexeyAB/darknet)**
 * **[YoloV3](https://pjreddie.com/darknet/yolo/)**
 
-## Whatis StalkedByTheState ? ##
+## What is StalkedByTheState ? ##
 
 StalkedByTheState is a highly effective proactive/preventative home and business security system that installs to a
 production ready appliance in just a couple of commands.
