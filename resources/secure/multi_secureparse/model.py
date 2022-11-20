@@ -28,7 +28,7 @@ class ModelMap():
         return self.modelsMap[name]["url"]
 
 class Notify():
-    def __init__(self, name, zoneList:list, url, username, password, method, params, enabled):
+    def __init__(self, name, zoneList:list, url, username, password, method, params, negate, enabled):
         self.lock = threading.Lock()
         self.name = name
         self.zoneList = zoneList
@@ -37,6 +37,7 @@ class Notify():
         self.password = password
         self.method = method
         self.params = params
+        self.negate = negate
         self.enabled = enabled
 
     @classmethod
@@ -57,6 +58,12 @@ class Notify():
         else:
             enabled = True
 
+        # True means we want a notification if nothing matches
+        if 'negate' in notifyJson.keys():
+            negate = notifyJson['negate']
+        else:
+            negate = False
+
         return cls(name=notifyJson['name'],
                    zoneList=zoneList,
                    url=notifyJson['url'],
@@ -64,6 +71,7 @@ class Notify():
                    password=notifyJson['password'],
                    method=notifyJson['method'],
                    params=params,
+                   negate=negate,
                    enabled=enabled)
 
     @classmethod
@@ -100,6 +108,9 @@ class Notify():
             self.enabled = True
         finally:
             self.lock.release()
+
+    def isNegate(self):
+        return self.negate
 
     def disable(self):
         self.lock.acquire()

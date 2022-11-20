@@ -141,9 +141,9 @@ async def webServer():
 
     app = web.Application()
     # app.router.add_get('/', handle)
-    app.router.add_get('/enabled', reportnotifyState)
-    app.router.add_get('/notify/{op}/{cam}/{notification}', changeNotifyState)
-    app.router.add_get('/cam/{op}/{cam}', changeCameraState)
+    app.router.add_post('/enabled', reportnotifyState)
+    app.router.add_post('/notify/{op}/{cam}/{notification}', changeNotifyState)
+    app.router.add_post('/cam/{op}/{cam}', changeCameraState)
     runner = web.AppRunner(app)
     await runner.setup()
 
@@ -189,8 +189,12 @@ async def processResult(resultCache, image, returnResult:ReturnResult, camera:Ca
             if returnResult.getTriggered():
                 break
 
-        if returnResult.getTriggered():
-            fireNotification(notify)
+        if notify.isNegate():
+            if not returnResult.getTriggered():
+                fireNotification(notify)
+        else:
+            if returnResult.getTriggered():
+                fireNotification(notify)
 
 async def checkIncluded(image, include, resultCache, returnResult:ReturnResult):
     for modelList in include.getModels():
