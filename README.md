@@ -41,6 +41,7 @@ rate based triggers, synthetic combination events.
 can choose to use yolov7 in one part of an image, yolov4 in another, or choose to have to triggered confirmed with both.
 Or either... or several more. Object detection is done via a network service over a websocket so you can add external models to your appliance
 if you like, or models that are not yolo-like object detectors so long as you provide a websocket wrapper service.
+* Support for negative matching. i.e. notify if you don't see an object in an image
 * Scanner that reads camera frames, detects objects and then matches them for triggers can be dynamically enabled and disabled, either
 at the whole camera level or down to a specific notification level
 * Support for auto-renew letsencrypt certificates. Can be setup as a reverse proxy to tunnel access to StalkedByTheState
