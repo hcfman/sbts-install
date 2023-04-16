@@ -21,8 +21,8 @@ The intention is that the whole system runs on top of a read-only mounted memory
 Currently StalkedByTheState installs the following object detectors by default (Based on memory capacity of the platform)
 
 * **[Yolov7](https://github.com/WongKinYiu/yolov7) (Chien-Yao Wang, Alexey Bochkovskiy, Hong-Yuan Mark Liao)**
-* **[YoloV4](https://github.com/AlexeyAB/darknet)**
-* **[YoloV3](https://pjreddie.com/darknet/yolo/)**
+* **[YoloV4](https://github.com/AlexeyAB/darknet) (Alexey Bochkovskiy)**
+* **[YoloV3](https://pjreddie.com/darknet/yolo/) (P.J. Reddie)**
 
 ## What is StalkedByTheState ? ##
 
