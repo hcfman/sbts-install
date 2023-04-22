@@ -628,134 +628,6 @@ install_yolov7() {
     copy_to "resources/yolov7/start_sbts_yolov7_server.sh" "$SUDO_USER_HOME/$YOLOV7_DIR"
 }
 
-install_yolor() {
-    YOLOR_SBTS_STABLE_COMMIT="be7da6eba2f612a15bf462951d3cdde66755a180"
-    YOLOR_URL="https://github.com/WongKinYiu/yolor.git"
-    YOLOR_DIR="yolor-paper"
-
-    # This needs around 4GB of resident memory to run
-    if ! has_more_than_4GB ; then
-        return
-    fi
-
-    echo ""
-    echo "Installing yolor"
-    echo ""
-
-    if [ -e "$SUDO_USER_HOME/$YOLOR_DIR" ] ; then
-        echo "YOLOR_URL already installed"
-        return
-    fi
-
-    cd "$SUDO_USER_HOME" || abort "Can't change directory to $SUDO_USER_HOME"
-
-    if ! su "$SUDO_USER" -c "git clone \"$YOLOR_URL\" $YOLOR_DIR" ; then
-        abort "Can't clone YOLOR_URL"
-    fi
-
-    cd "$SUDO_USER_HOME/$YOLOR_DIR" || abort "Can't change to $SUDO_USER_HOME/$YOLOR_DIR"
-
-    if ! sudo -H -u "$SUDO_USER" git checkout paper ; then
-        abort "Can't checkout yolor paper branch"
-    fi
-
-    # Stable with sbts code
-    if ! sudo -H -u "$SUDO_USER" git checkout --detach "$YOLOR_SBTS_STABLE_COMMIT" ; then
-        abort "Can't checkout SBTS stable commit for yolor"
-    fi
-
-    if [ ! -d "inference" ] ; then
-        if ! sudo -H -u "$SUDO_USER" mkdir inference ; then
-            abort "Can't create inference directory"
-        fi
-    fi
-
-    migrate_dir_to_disk "$SUDO_USER_HOME/$YOLOR_DIR/inference" "$SUDO_USER_HOME/disk/$YOLOR_DIR"
-
-    sudo -H -u "$SUDO_USER" mkdir weights || abort "Can't create weights directory"
-
-    if ! cd "weights" ; then
-        abort "Can't directory to weights"
-    fi
-
-    # yolor-d6.pt
-    gdown_file "1WX33ymg_XJLUJdoSf5oUYGHAtpSG2gj8"
-    # yolor-p6.pt
-    gdown_file "1WyzcN1-I0n8BoeRhi_xVt8C5msqdx_7k"
-    # yolor-w6.pt
-    gdown_file "1KnkBzNxATKK8AiDXrW_qF-vRNOsICV0B"
-    # yolor-e6.pt
-    gdown_file "1jVrq8R1TA60XTUEqqljxAPlt0M_MAGC8"
-
-    cd "$HERE" || abort "Can't change back to $HERE"
-
-    copy_to "resources/yolor/sbts-yolor-paper-server.py" "$SUDO_USER_HOME/$YOLOR_DIR"
-    copy_to "resources/yolor/start_sbts_yolor_server.sh" "$SUDO_USER_HOME/$YOLOR_DIR"
-}
-
-
-install_scaled_yolov4() {
-    SCALED_YOLOV4_SBTS_STABLE_COMMIT="676800364a3446900b9e8407bc880ea2127b3415"
-    SCALED_YOLOV4_URL="https://github.com/WongKinYiu/ScaledYOLOv4.git"
-    SCALED_YOLOV4_DIR="ScaledYOLOv4-large"
-
-    # This needs around 4GB of resident memory to run
-    if ! has_more_than_4GB ; then
-        return
-    fi
-
-    echo ""
-    echo "Installing scaled_yolov4"
-    echo ""
-
-    if [ -e "$SUDO_USER_HOME/$SCALED_YOLOV4_DIR" ] ; then
-        echo "SCALED_YOLOV4_URL already installed"
-        return
-    fi
-
-    cd "$SUDO_USER_HOME" || abort "Can't change directory to $SUDO_USER_HOME"
-
-    if ! sudo -H -u "$SUDO_USER" git clone "$SCALED_YOLOV4_URL" "$SCALED_YOLOV4_DIR" ; then
-        abort "Can't clone SCALED_YOLOV4_URL"
-    fi
-
-    cd "$SUDO_USER_HOME/$SCALED_YOLOV4_DIR" || abort "Can't change to $SUDO_USER_HOME/$SCALED_YOLOV4_DIR"
-
-    if ! sudo -H -u "$SUDO_USER" git checkout yolov4-large ; then
-        abort "Can't checkout scaled_yolov4 yolov4-large branch"
-    fi
-
-    # Stable with sbts code
-    if ! sudo -H -u "$SUDO_USER" git checkout --detach "$SCALED_YOLOV4_SBTS_STABLE_COMMIT" ; then
-        abort "Can't checkout SBTS stable commit for scaled_yolov4"
-    fi
-
-    if [ ! -d "inference" ] ; then
-        if ! su "$SUDO_USER" -c "mkdir inference" ; then
-            abort "Can't create inference directory"
-        fi
-    fi
-
-    migrate_dir_to_disk "$SUDO_USER_HOME/$SCALED_YOLOV4_DIR/inference" "$SUDO_USER_HOME/disk/scaled_yolov4"
-
-    sudo -H -u "$SUDO_USER" mkdir weights
-    if ! cd "weights" ; then
-        abort "Can't directory to weights"
-    fi
-
-    # yolov4-p7.pt
-    gdown_file "18fGlzgEJTkUEiBG4hW00pyedJKNnYLP3"
-    # yolov4-p6.pt
-    gdown_file "1aB7May8oPYzBqbgwYSZHuATPXyxh9xnf"
-    # yolov4-p5.pt
-    gdown_file "1aXZZE999sHMP1gev60XhNChtHPRMH3Fz"
-
-    cd "$HERE" || abort "Can't change back to $HERE"
-
-    copy_to "resources/scaled_yolov4/sbts-scaled-yolov4-large-server.py" "$SUDO_USER_HOME/$SCALED_YOLOV4_DIR"
-    copy_to "resources/scaled_yolov4/start_sbts_scaled_yolov4_server.sh" "$SUDO_USER_HOME/$SCALED_YOLOV4_DIR"
-}
-
 create_tmp_in_disk() {
     mkdir "$SUDO_USER_HOME/disk/tmp" || abort "Can't create tmp in $SUDO_USER_HOME"
     chmod 777 "$SUDO_USER_HOME/disk/tmp" || abort "Can't change mode on $SUDO_USER_HOME/disk/tmp"
@@ -1117,8 +989,6 @@ EOF
 #su - "${SUDO_USER}" -c "${SUDO_USER_HOME}/darknet/start_sbts_pj_yolov3_server.sh > /dev/null 2>&1 &" &
 #su - "${SUDO_USER}" -c "${SUDO_USER_HOME}/alexyab_darknet/start_sbts_ab_yolov3_server.sh > /dev/null 2>&1 &" &
 su - "${SUDO_USER}" -c "${SUDO_USER_HOME}/alexyab_darknet/start_sbts_ab_yolov4_server.sh > /dev/null 2>&1 &" &
-#su - "${SUDO_USER}" -c "${SUDO_USER_HOME}/scaled_yolov4/start_sbts_scaled_yolov4_server.sh > /dev/null 2>&1 &" &
-#su - "${SUDO_USER}" -c "${SUDO_USER_HOME}/yolor/start_sbts_yolor_server.sh > /dev/null 2>&1 &" &
 su - "${SUDO_USER}" -c "${SUDO_USER_HOME}/yolov7/start_sbts_yolov7_server.sh > /dev/null 2>&1 &" &
 EOF
     elif has_more_than_4GB ; then
@@ -1127,8 +997,6 @@ EOF
 #su - "${SUDO_USER}" -c "${SUDO_USER_HOME}/darknet/start_sbts_pj_yolov3_server.sh > /dev/null 2>&1 &" &
 #su - "${SUDO_USER}" -c "${SUDO_USER_HOME}/alexyab_darknet/start_sbts_ab_yolov3_server.sh > /dev/null 2>&1 &" &
 #su - "${SUDO_USER}" -c "${SUDO_USER_HOME}/alexyab_darknet/start_sbts_ab_yolov4_server.sh > /dev/null 2>&1 &" &
-#su - "${SUDO_USER}" -c "${SUDO_USER_HOME}/scaled_yolov4/start_sbts_scaled_yolov4_server.sh > /dev/null 2>&1 &" &
-#su - "${SUDO_USER}" -c "${SUDO_USER_HOME}/yolor/start_sbts_yolor_server.sh > /dev/null 2>&1 &" &
 su - "${SUDO_USER}" -c "${SUDO_USER_HOME}/yolov7/start_sbts_yolov7_server.sh > /dev/null 2>&1 &" &
 EOF
     else
@@ -1339,12 +1207,6 @@ install_darknet
 install_alexeyab_darknet
 
 install_yolov7
-
-# Weights not available to download
-# install_yolor
-
-# Weights not available to download
-# install_scaled_yolov4
 
 create_tmp_in_disk
 
