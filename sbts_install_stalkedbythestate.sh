@@ -186,7 +186,16 @@ install_packages() {
     echo "Installing packages"
     echo ""
 
-    for package in cmake libomp-dev libpng-dev libjpeg-dev curl htop openjdk-8-jdk libgeos-3.6.2 libgeos-c1v5 apache2 letsencrypt python3-certbot-apache maven vlc vlc-bin pwgen; do
+    OS_VERSION_ID=$(perl -n -e 'print $1, "\n" if m%^VERSION_ID="?([^"]*)%' /etc/os-release)
+
+    local LIBGEOS_VERSION
+    if [ "$OS_VERSION_ID" < "20.04" ] ; then
+        LIBGEOS_VERSION="libgeos-3.6.2"
+    else
+        LIBGEOS_VERSION="libgeos-3.8.0"
+    fi
+
+    for package in cmake libomp-dev libpng-dev libjpeg-dev curl htop openjdk-8-jdk "$LIBGEOS_VERSION" libgeos-c1v5 apache2 letsencrypt python3-certbot-apache maven vlc vlc-bin pwgen; do
         if ! dpkg -l "$package" > /dev/null 2>&1 ; then
             echo "Installing package \"$package\""
             install_package "$package"
@@ -236,37 +245,52 @@ install_extra_wheels() {
         abort "Can't change directory to /tmp"
     fi
 
-    # Pytorch
-    download_file "https://github.com/hcfman/sbts-prereqs/releases/download/sbtq-prereqs_v1.0.0_jetpack_4.6.1/torch-1.10.0a0+git71f889c-cp36-cp36m-linux_aarch64.whl"
+    local OS_WHEEL_LOCATION OS_PYTORCH_WHEEL OS_TORCH_VISION_WHEEL OS_MISH_CUDA_WHEEL
 
-    if ! python3 -m pip install "./torch-1.10.0a0+git71f889c-cp36-cp36m-linux_aarch64.whl" ; then
-        abort "Can't install torch module"
+    if [ "$OS_VERSION_ID" < "20.04" ] ; then
+        OS_WHEEL_LOCATION="https://github.com/hcfman/sbts-prereqs/releases/download/sbtq-prereqs_v1.0.0_jetpack_4.6.1"
+        OS_PYTORCH_WHEEL="torch-1.10.0a0+git71f889c-cp36-cp36m-linux_aarch64.whl"
+        OS_TORCH_VISION_WHEEL="torchvision-0.11.0a0+05eae32-cp36-cp36m-linux_aarch64.whl"
+        OS_MISH_CUDA_WHEEL="mish_cuda-0.0.3-cp36-cp36m-linux_aarch64.whl"
+    else
+        OS_WHEEL_LOCATION="https://github.com/hcfman/sbts-prereqs/releases/download/sbtq-prereqs_v1.0.0_jetpack_5.1"
+        OS_PYTORCH_WHEEL="torch-1.13.0a0+gitd922c29-cp38-cp38-linux_aarch64.whl"
+        OS_TORCH_VISION_WHEEL="torchvision-0.14.1a0+0504df5-cp38-cp38-linux_aarch64.whl"
+        OS_MISH_CUDA_WHEEL="mish_cuda-0.0.3-cp38-cp38-linux_aarch64.whl"
     fi
 
-    if ! rm "./torch-1.10.0a0+git71f889c-cp36-cp36m-linux_aarch64.whl" ; then
-        abort "Can't remove installed pytorch wheel"
+
+    # Pytorch
+    download_file "$OS_WHEEL_LOCATION/$OS_PYTORCH_WHEEL"
+
+    if ! python3 -m pip install "$OS_PYTORCH_WHEEL" ; then
+        abort "Can't install $OS_PYTORCH_WHEEL"
+    fi
+
+    if ! rm "$OS_PYTORCH_WHEEL" ; then
+        abort "Can't remove installed $OS_PYTORCH_WHEEL"
     fi
 
     # Torchvision
-    download_file "https://github.com/hcfman/sbts-prereqs/releases/download/sbtq-prereqs_v1.0.0_jetpack_4.6.1/torchvision-0.11.0a0+05eae32-cp36-cp36m-linux_aarch64.whl"
+    download_file "$OS_WHEEL_LOCATION/$OS_TORCH_VISION_WHEEL"
 
-    if ! python3 -m pip install "./torchvision-0.11.0a0+05eae32-cp36-cp36m-linux_aarch64.whl" ; then
-        abort "Can't install torchvision module"
+    if ! python3 -m pip install "$OS_TORCH_VISION_WHEEL" ; then
+        abort "Can't install $OS_TORCH_VISION_WHEEL"
     fi
 
-    if ! rm "./torchvision-0.11.0a0+05eae32-cp36-cp36m-linux_aarch64.whl" ; then
-        abort "Can't remove installed pytorch wheel"
+    if ! rm "$OS_TORCH_VISION_WHEEL" ; then
+        abort "Can't remove installed $OS_TORCH_VISION_WHEEL"
     fi
 
     # Mish-cuda
-    download_file "https://github.com/hcfman/sbts-prereqs/releases/download/sbtq-prereqs_v1.0.0_jetpack_4.6.1/mish_cuda-0.0.3-cp36-cp36m-linux_aarch64.whl"
+    download_file "$OS_WHEEL_LOCATION/$OS_MISH_CUDA_WHEEL"
 
-    if ! python3 -m pip install "./mish_cuda-0.0.3-cp36-cp36m-linux_aarch64.whl" ; then
-        abort "Can't install mish-cuda module"
+    if ! python3 -m pip install "$OS_MISH_CUDA_WHEEL" ; then
+        abort "Can't install $OS_MISH_CUDA_WHEEL"
     fi
 
-    if ! rm "./mish_cuda-0.0.3-cp36-cp36m-linux_aarch64.whl" ; then
-        abort "Can't remove installed mish-cuda wheel"
+    if ! rm "$OS_MISH_CUDA_WHEEL" ; then
+        abort "Can't remove installed $OS_MISH_CUDA_WHEEL"
     fi
 }
 
@@ -1316,9 +1340,11 @@ install_alexeyab_darknet
 
 install_yolov7
 
-install_yolor
+# Weights not available to download
+# install_yolor
 
-install_scaled_yolov4
+# Weights not available to download
+# install_scaled_yolov4
 
 create_tmp_in_disk
 
