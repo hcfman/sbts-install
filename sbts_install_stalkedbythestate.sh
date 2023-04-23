@@ -448,6 +448,12 @@ determine_platform_branch() {
 
 	    echo "Jetson Xavier AGX detected"
             ;;
+        "NVIDIA Orin Nano Developer Kit")
+            PLATFORM_BRANCH=sbts-jetson-orin-nano
+            nvpmodel -m 0
+	    jetson_clocks --fan
+	    echo "Jetson Nano detected"
+            ;;
         *)
             abort "Cannot determine the platform type to build darknet for"
             ;;
@@ -961,6 +967,10 @@ EOF
         "Jetson-AGX")
             PLATFORM_BRANCH=sbts-jetson-xavier-agx
             echo nvpmodel -m 3 >> /etc/rc.local
+            ;;
+        "sbts-jetson-orin-nano")
+            PLATFORM_BRANCH=sbts-jetson-xavier-agx
+            echo nvpmodel -m 0 >> /etc/rc.local
             ;;
         *)
             abort "Cannot determine the platform type"
