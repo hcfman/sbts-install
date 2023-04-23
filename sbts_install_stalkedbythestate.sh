@@ -968,7 +968,7 @@ EOF
             PLATFORM_BRANCH=sbts-jetson-xavier-agx
             echo nvpmodel -m 3 >> /etc/rc.local
             ;;
-        "sbts-jetson-orin-nano")
+        "NVIDIA Orin Nano Developer Kit")
             PLATFORM_BRANCH=sbts-jetson-orin-nano
             echo nvpmodel -m 0 >> /etc/rc.local
             ;;
