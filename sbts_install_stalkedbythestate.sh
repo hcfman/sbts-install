@@ -969,7 +969,7 @@ EOF
             echo nvpmodel -m 3 >> /etc/rc.local
             ;;
         "sbts-jetson-orin-nano")
-            PLATFORM_BRANCH=sbts-jetson-xavier-agx
+            PLATFORM_BRANCH=sbts-jetson-orin-nano
             echo nvpmodel -m 0 >> /etc/rc.local
             ;;
         *)
