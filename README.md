@@ -1,6 +1,10 @@
 # sbts-install
 
-Installs the latest release of StalkedByTheState on one of NVIDIA Jetson Nano, NX or AGX.
+Installs the latest release of StalkedByTheState on Jetson platforms.
+
+The following platforms are currently supported:
+
+Jetson Nano, Jetson NX, Jetson AGX, Jetson Orin Nano, Jetson Orin AGX
 
 ## StalkedByTheState Architecture ##
 
