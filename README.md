@@ -4,7 +4,7 @@ Installs the latest release of StalkedByTheState on Jetson platforms.
 
 The following platforms are currently supported:
 
-Jetson **Nano**, Jetson **NX**, Jetson **AGX**, Jetson **Orin Nano**, Jetson **Orin AGX** on both jetpack 4.6 and 5.x
+Jetson **Nano**, Jetson **NX**, Jetson **AGX**, Jetson **Orin Nano**, Jetson **Orin AGX** on both **jetpack 4.6 and 5.x**
 
 ## StalkedByTheState Architecture ##
 
