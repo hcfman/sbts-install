@@ -195,7 +195,12 @@ install_packages() {
         LIBGEOS_VERSION="libgeos-3.8.0"
     fi
 
-    for package in cmake libomp-dev libpng-dev libjpeg-dev curl htop openjdk-8-jdk "$LIBGEOS_VERSION" libgeos-c1v5 maven vlc vlc-bin pwgen apache2 letsencrypt python3-certbot-apache;do
+    if [ ! -e "/etc/apache2/sites-available" ] ; then
+        echo "Installing package \"apache2\""
+        install_package "apache2"
+    fi
+
+    for package in cmake libomp-dev libpng-dev libjpeg-dev curl htop openjdk-8-jdk "$LIBGEOS_VERSION" libgeos-c1v5 maven vlc vlc-bin pwgen letsencrypt python3-certbot-apache;do
         if ! dpkg -l "$package" > /dev/null 2>&1 ; then
             echo "Installing package \"$package\""
             install_package "$package"
