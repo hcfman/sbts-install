@@ -333,8 +333,15 @@ install_python_modules() {
     # Pytorch should be installed first as above
     install_module "thop"
 
+    if ! python3 -c "import flask" ; then
+        echo "Installing python module \"flask\""
+        if ! python3 -m pip install "flask==2.0.2" ; then
+            abort "Can't install pip3 module \"flask==2.0.2\""
+        fi
+    fi
+
     # Modules for sbts
-    for m in flask==2.0.2 requests websockets shapely configparser asyncio aiohttp; do
+    for m in requests websockets shapely configparser asyncio aiohttp; do
         install_module "$m"
     done
 }
