@@ -334,7 +334,7 @@ install_python_modules() {
     install_module "thop"
 
     # Modules for sbts
-    for m in flask requests websockets shapely configparser asyncio aiohttp; do
+    for m in flask==2.0.2 requests websockets shapely configparser asyncio aiohttp; do
         install_module "$m"
     done
 }
