@@ -446,14 +446,25 @@ determine_platform_branch() {
             ;;
         "Jetson-AGX")
             PLATFORM_BRANCH=sbts-jetson-xavier-agx
-            nvpmodel -m 3
+            nvpmodel -m 0
 	    jetson_clocks --fan
 
             if [ -d /var/lib/nvpmodel/status ] ; then
-                echo -n 'pmode:0003 fmode:quiet' > /var/lib/nvpmodel/status
+                echo -n 'pmode:0000 fmode:quiet' > /var/lib/nvpmodel/status
             fi
 
 	    echo "Jetson Xavier AGX detected"
+            ;;
+        "Jetson AGX Orin")
+            PLATFORM_BRANCH=sbts-jetson-orin-agx
+            nvpmodel -m 0
+            jetson_clocks --fan
+
+            if [ -d /var/lib/nvpmodel/status ] ; then
+                echo -n 'pmode:0000 fmode:quiet' > /var/lib/nvpmodel/status
+            fi
+
+	    echo "Jetson Orin AGX detected"
             ;;
         "NVIDIA Orin Nano Developer Kit")
             PLATFORM_BRANCH=sbts-jetson-orin-nano
@@ -973,7 +984,11 @@ EOF
             ;;
         "Jetson-AGX")
             PLATFORM_BRANCH=sbts-jetson-xavier-agx
-            echo nvpmodel -m 3 >> /etc/rc.local
+            echo nvpmodel -m 0 >> /etc/rc.local
+            ;;
+        "Jetson AGX Orin")
+            PLATFORM_BRANCH=sbts-jetson-orin-agx
+            echo nvpmodel -m 0 >> /etc/rc.local
             ;;
         "NVIDIA Orin Nano Developer Kit")
             PLATFORM_BRANCH=sbts-jetson-orin-nano
