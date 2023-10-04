@@ -1,5 +1,7 @@
 # sbts-install
 
+**Note: I'm still working on the install for Orin series computers, or will be shortly (Finishing off the sbts-aru project)**
+
 Installs the latest release of StalkedByTheState on Jetson platforms.
 
 The following platforms are currently supported:
