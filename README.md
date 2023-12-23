@@ -1,14 +1,32 @@
 # sbts-install
 
+The installer for the StalkedByTheState project
+
+## A little history... ##
+
+Hi, my name is **Kim Hendrikse**. This project actually started in 2005 when a series of events put the security of me and my family in danger. The impact of this effectively hijacked my life for the following 18 years, making me somewhat security obsessed. This project evolved throughout that time as a result.
+
+The project started in earnest in 2008 when I started on a Java based alerter and series development started and was finished in 2011 when I worked together with a frontend developer every weekend for between 6-12 months.
+
+Operation primarily involved the use of PIR sensors until 2019 when NVidia released the Jetson Nano making it possible to run a full sized version of YoloV3 as a security appliance. Though it's still possible to trigger from devices like PIR sensors, the emergence of computer vision effectively obsoleted them for most purposes.
+
+Over time I have been pivoting away from strict security use cases towards Wildlife Preservation efforts. Recently I integrated [DeepFaune](https://www.deepfaune.cnrs.fr/en/), a model developed in co-operation with over 40 partners for detecting and classify many European fauna including Wolves, Bears, Lynxes, deer etc. The release of this will coincide with the release to fully support the Orin platforms. With likely a Raspberry Pi version also coming if feasible.
+
+The integration of deepfaune and other models for animals involved in human/wildlife conflict create for a platform with realistic chances of providing a longish distance early warning detection. In case of wolves in the Netherlands, a beacon of hope for farmers who would in principle be in favour of co-existence in with wildlife but have no tools to help them protect their livestock.
+
+## Development status ##
+
 **Note: I'm still working on the install for Orin series computers, or will be shortly (Finishing off the sbts-aru project)**
+
+## StalkedByTheState Architecture ##
+
+
 
 Installs the latest release of StalkedByTheState on Jetson platforms.
 
 The following platforms are currently supported:
 
 Jetson **Nano**, Jetson **NX**, Jetson **AGX**, Jetson **Orin Nano**, Jetson **Orin AGX** on both **jetpack 4.6 and 5.x**
-
-## StalkedByTheState Architecture ##
 
 <img src="docs/images/sbts-arch.svg">
 
