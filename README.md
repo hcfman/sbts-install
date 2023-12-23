@@ -8,9 +8,9 @@ Hi, my name is **Kim Hendrikse**. This project actually started in 2005 when a s
 
 The project started in earnest in 2008 when I started on a Java based alerter and series development started and was finished in 2011 when I worked together with a frontend developer every weekend for between 6-12 months.
 
-Operation primarily involved the use of PIR sensors until 2019 when NVidia released the Jetson Nano making it possible to run a full sized version of YoloV3 as a security appliance. Though it's still possible to trigger from devices like PIR sensors, the emergence of computer vision effectively obsoleted them for most purposes.
+Operation primarily involved the use of PIR sensors until 2019 when NVidia released the **Jetson** Nano making it possible to run a full sized version of YoloV3 as a security appliance. Though it's still possible to trigger from devices like PIR sensors, the emergence of computer vision effectively obsoleted them for most purposes.
 
-Over time I have been pivoting away from strict security use cases towards Wildlife Preservation efforts. Recently I integrated [DeepFaune](https://www.deepfaune.cnrs.fr/en/), a model developed in co-operation with over 40 partners for detecting and classify many European fauna including Wolves, Bears, Lynxes, deer etc. The release of this will coincide with the release to fully support the Orin platforms. With likely a Raspberry Pi version also coming if feasible.
+Over time I have been pivoting away from strict security use cases towards **Wildlife Preservation** efforts. Recently I integrated [DeepFaune](https://www.deepfaune.cnrs.fr/en/), a model developed in co-operation with over 40 partners for detecting and classify many European fauna including Wolves, Bears, Lynxes, deer etc. The release of this will coincide with the release to fully support the Orin platforms. With likely a **Raspberry Pi** version also coming if feasible.
 
 The integration of deepfaune and other models for animals involved in human/wildlife conflict create for a platform with realistic chances of providing a longish distance early warning detection. In case of wolves in the Netherlands, a beacon of hope for farmers who would in principle be in favour of co-existence in with wildlife but have no tools to help them protect their livestock.
 
