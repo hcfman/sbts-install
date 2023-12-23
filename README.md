@@ -16,7 +16,7 @@ The integration of deepfaune and other models for animals involved in human/wild
 
 ## Development status ##
 
-**Note: I'm still working on the install for Orin series computers, or will be shortly (Finishing off the sbts-aru project)**
+**Note: I'm still working on the install for Orin series computers**
 
 ## StalkedByTheState Architecture ##
 
