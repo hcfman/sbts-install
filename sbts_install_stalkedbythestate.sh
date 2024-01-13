@@ -252,7 +252,7 @@ install_extra_wheels() {
 
     local OS_WHEEL_LOCATION OS_PYTORCH_WHEEL OS_TORCH_VISION_WHEEL OS_MISH_CUDA_WHEEL
 
-    if [ "$OS_VERSION_ID" < "20.04" ] ; then
+    if [ "$OS_VERSION_ID" -lt "20.04" ] ; then
         OS_WHEEL_LOCATION="https://github.com/hcfman/sbts-prereqs/releases/download/sbtq-prereqs_v1.0.0_jetpack_4.6.1"
         OS_PYTORCH_WHEEL="torch-1.10.0a0+git71f889c-cp36-cp36m-linux_aarch64.whl"
         OS_TORCH_VISION_WHEEL="torchvision-0.11.0a0+05eae32-cp36-cp36m-linux_aarch64.whl"
