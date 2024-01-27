@@ -118,7 +118,8 @@ update_pkg_registry() {
         echo Updating the package registry
         echo ""
         apt update
-        apt upgrade -y
+        # This can change the kernel to one that doesn't support the GPU
+        #apt upgrade -y
         UPDATED=1
     fi
 }
