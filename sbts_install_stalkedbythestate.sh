@@ -6,7 +6,7 @@ UPDATED=
 
 APP_FILE="stalkedbythestate_app_jetson_v1.00.tar.gz"
 APP_URL="https://github.com/hcfman/stalkedbythestate/releases/download/stalkedbythestate_app_jetson_v1.00/$APP_FILE"
-APP_CHECKSUM="539dd22daad7164a68aacf178cd7fb30"
+APP_CHECKSUM="4b734ca4cd6198a9cc38299f11477947"
 
 # Needed after upgrading numpy due to a bug in the upgrade version on arm
 export OPENBLAS_CORETYPE=ARMV8
