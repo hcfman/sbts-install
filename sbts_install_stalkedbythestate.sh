@@ -473,7 +473,7 @@ determine_platform_branch() {
 	    echo "Jetson Orin AGX detected"
             ;;
         "NVIDIA Orin NX Developer Kit")
-            PLATFORM_BRANCH=sbts-jetson-nx-nano
+            PLATFORM_BRANCH=sbts-jetson-orin-nx
             nvpmodel -m 0
 	    jetson_clocks --fan
 	    echo "Jetson Orin NX detected"
