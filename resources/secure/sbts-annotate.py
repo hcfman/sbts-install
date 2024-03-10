@@ -113,13 +113,13 @@ async def processResult(frameMap, resultCache, image, camera:CameraReader):
     for notify in camera.getNotifyList():
         if len(notify_set) > 0 and notify.getName() not in notify_set:
             continue
+        else:
+            for zone in notify.getZoneList():
+                for include in zone.getIncludeList():
+                    await checkIncluded(frameMap, image, include, resultCache, True)
 
-        for zone in notify.getZoneList():
-            for include in zone.getIncludeList():
-                await checkIncluded(frameMap, image, include, resultCache, True)
-
-            for include in zone.getExcludeList():
-                await checkIncluded(frameMap, image, include, resultCache, False)
+                for include in zone.getExcludeList():
+                    await checkIncluded(frameMap, image, include, resultCache, False)
 
 async def checkIncluded(frameMap, image, include, resultCache, included:bool):
     global neverDrawn
@@ -183,7 +183,6 @@ def drawRegions(frameMap, camera):
         for zone in notify.getZoneList():
             if len(notify_set) > 0 and notify.getName() not in notify_set:
                 continue
-
             for include in zone.getIncludeList():
                 for modelList in include.getModels():
                     for model in modelList:
@@ -198,6 +197,10 @@ def drawRegions(frameMap, camera):
                             cv2.polylines(frameMap.getFrame(model.getName()), [pts], True, (0, 0, 255))
 
 def getFileList():
+    global start_range, end_range
+
+    pattern = re.compile(r'^(\d{4})\.jpg$')
+
     fileList = []
     mypath = args.directory + os.path.sep
     for filename in sorted(listdir(args.directory)):
@@ -205,6 +208,13 @@ def getFileList():
         if file_set is not None:
             if not filename in file_set:
                 continue
+
+        match = pattern.match(filename)
+        if match:
+            file_number = int(match.group(1))
+            if file_number < start_range or file_number > end_range:
+                continue
+
         if isfile(fullPath) and filename.endswith(".jpg") and not "_ano_" in filename:
             fileList.append(fullPath)
     return fileList
@@ -274,9 +284,6 @@ def annotator():
 
     sys.exit(0)
 
-import os
-import sys
-
 def filter_images():
     files_set = set()
 
@@ -299,6 +306,18 @@ def define_relevant_notifications():
 
     return set(args.notifications.split(','))
 
+def check_numbers():
+    global start_range, end_range
+
+    if args.num_range is None:
+        return
+
+    pattern = re.compile(r'^(\d{1,4}),(\d{1,4})$')
+    match = pattern.match(args.num_range)
+    if match:
+        start_range = int(match.group(1))
+        end_range = int(match.group(2))
+
 def initialize(configFilename, readers):
     with open(configFilename) as infile:
         data = infile.read();
@@ -312,6 +331,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument("-m", "--model-list", dest="model_list", help="List of models and their websocket urls")
 parser.add_argument("-f", "--file-name-list", dest="file_name_list", help="List of files from the directory to annotate")
 parser.add_argument("-n", "--notifications", dest="notifications", help="Relevant notifications")
+parser.add_argument("-N", "--numbers", dest="num_range", help="Command separated range of numbers")
 parser.add_argument("configFile", help="Path to config file")
 parser.add_argument("cameraName", help="Camera name")
 parser.add_argument("directory", help="Directory")
@@ -321,7 +341,13 @@ if args.configFile is None:
     print("Usage: {0} config-json-file Camera-name Directory".format(sys.argv[0]))
     sys.exit(1)
 
+start_range=1
+end_range=9999
+
 file_set = filter_images()
+if args.num_range is not None:
+    check_numbers()
+
 notify_set = define_relevant_notifications()
 
 neverDrawn = True
