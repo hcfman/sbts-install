@@ -111,6 +111,9 @@ def drawTarget(model, prob, x, y, w, h, frameMap):
 
 async def processResult(frameMap, resultCache, image, camera:CameraReader):
     for notify in camera.getNotifyList():
+        if len(notify_set) > 0 and notify.getName() not in notify_set:
+            continue
+
         for zone in notify.getZoneList():
             for include in zone.getIncludeList():
                 await checkIncluded(frameMap, image, include, resultCache, True)
@@ -119,7 +122,11 @@ async def processResult(frameMap, resultCache, image, camera:CameraReader):
                 await checkIncluded(frameMap, image, include, resultCache, False)
 
 async def checkIncluded(frameMap, image, include, resultCache, included:bool):
-    global neverDrawn;
+    global neverDrawn
+    global model_prob_map
+
+    if included:
+        model_prob_map = {}
 
     for modelList in include.getModels():
         triggerCount = 0
@@ -138,6 +145,9 @@ async def checkIncluded(frameMap, image, include, resultCache, included:bool):
                     if count > 0:
                         drawTargetCross(int(x), int(y), frameMap.getFrame(model.getName()), included)
                         triggerCount += 1
+
+                        if included:
+                            model_prob_map[model.getName()] = prob
 
 def readConfigFile():
     global parser
@@ -171,23 +181,30 @@ def drawRegions(frameMap, camera):
 
     for notify in camera.getNotifyList():
         for zone in notify.getZoneList():
+            if len(notify_set) > 0 and notify.getName() not in notify_set:
+                continue
+
             for include in zone.getIncludeList():
                 for modelList in include.getModels():
                     for model in modelList:
                         pts = np.array(model.getPolygon().getPointList(), np.int32)
                         cv2.polylines(frameMap.getFrame(model.getName()), [pts], True, (0, 255, 255))
 
-            for exclude in zone.getExcludeList():
-                for modelList in exclude.getModels():
-                    for model in modelList:
-                        pts = np.array(model.getPolygon().getPointList(), np.int32)
-                        cv2.polylines(frameMap.getFrame(model.getName()), [pts], True, (0, 0, 255))
+            if len(notify_set) == 0:
+                for exclude in zone.getExcludeList():
+                    for modelList in exclude.getModels():
+                        for model in modelList:
+                            pts = np.array(model.getPolygon().getPointList(), np.int32)
+                            cv2.polylines(frameMap.getFrame(model.getName()), [pts], True, (0, 0, 255))
 
 def getFileList():
     fileList = []
     mypath = args.directory + os.path.sep
     for filename in sorted(listdir(args.directory)):
         fullPath = join(mypath, filename)
+        if file_set is not None:
+            if not filename in file_set:
+                continue
         if isfile(fullPath) and filename.endswith(".jpg") and not "_ano_" in filename:
             fileList.append(fullPath)
     return fileList
@@ -201,6 +218,14 @@ def initWebsocketMap(secureConfig):
         ws = yield from websockets.connect(url)
         wsMap[modelName] = ws
     return wsMap
+
+def highest_prob(model_prob_map):
+    # Check if the dictionary is empty
+    if not model_prob_map:
+        return None
+    else:
+        # Find the key with the highest value
+        return max(model_prob_map, key=model_prob_map.get)
 
 @asyncio.coroutine
 def annotator():
@@ -232,8 +257,13 @@ def annotator():
 
                 yield from processResult(frameMap, resultCache, jpg, camera)
 
+                chosen_model = highest_prob(model_prob_map)
                 for item in frameMap.getFrameMap().items():
-                    newImageName = filename.replace(".jpg", "_" + "ano_" + item[0] + ".jpg")
+                    if args.notifications is not None and chosen_model is not None and item[0] == chosen_model:
+                        newImageName = filename
+                    else:
+                        newImageName = filename.replace(".jpg", "_" + "ano_" + item[0] + ".jpg")
+
                     print("=> {}".format(newImageName))
                     cv2.imwrite(newImageName, item[1])
 
@@ -243,6 +273,31 @@ def annotator():
 
     sys.exit(0)
 
+import os
+import sys
+
+def filter_images():
+    files_set = set()
+
+    if args.file_name_list is None:
+        return
+
+    if args.file_name_list == "-":
+        for line in sys.stdin:
+            files_set.add(line.strip())
+    else:
+        with open(args.file_name_list, 'r') as file:
+            for line in file:
+                files_set.add(line.strip())
+
+    return files_set
+
+def define_relevant_notifications():
+    if args.notifications is None:
+        return set()
+
+    return set(args.notifications.split(','))
+
 def initialize(configFilename, readers):
     with open(configFilename) as infile:
         data = infile.read();
@@ -250,8 +305,12 @@ def initialize(configFilename, readers):
         for camera in configJson["cameraList"]:
             readers.append(CameraReader.from_json(camera))
 
+directory = None
+
 parser = argparse.ArgumentParser()
 parser.add_argument("-m", "--model-list", dest="model_list", help="List of models and their websocket urls")
+parser.add_argument("-f", "--file-name-list", dest="file_name_list", help="List of files from the directory to annotate")
+parser.add_argument("-n", "--notifications", dest="notifications", help="Relevant notifications")
 parser.add_argument("configFile", help="Path to config file")
 parser.add_argument("cameraName", help="Camera name")
 parser.add_argument("directory", help="Directory")
@@ -261,7 +320,11 @@ if args.configFile is None:
     print("Usage: {0} config-json-file Camera-name Directory".format(sys.argv[0]))
     sys.exit(1)
 
+file_set = filter_images()
+notify_set = define_relevant_notifications()
+
 neverDrawn = True
+model_prob_map = {}
 
 asyncio.get_event_loop().run_until_complete(annotator())
 asyncio.get_event_loop().run_forever()
