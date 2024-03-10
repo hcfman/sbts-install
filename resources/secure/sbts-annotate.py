@@ -259,13 +259,14 @@ def annotator():
 
                 chosen_model = highest_prob(model_prob_map)
                 for item in frameMap.getFrameMap().items():
-                    if args.notifications is not None and chosen_model is not None and item[0] == chosen_model:
-                        newImageName = filename
+                    if args.notifications is not None:
+                        if chosen_model is not None and item[0] == chosen_model:
+                            print("=> {}".format(filename))
+                            cv2.imwrite(filename, item[1])
                     else:
                         newImageName = filename.replace(".jpg", "_" + "ano_" + item[0] + ".jpg")
-
-                    print("=> {}".format(newImageName))
-                    cv2.imwrite(newImageName, item[1])
+                        print("=> {}".format(newImageName))
+                        cv2.imwrite(newImageName, item[1])
 
             except Exception as e:
                 print("Caught exception: {0}", type(e))
