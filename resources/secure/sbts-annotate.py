@@ -271,8 +271,11 @@ def annotator():
                 for item in frameMap.getFrameMap().items():
                     if args.notifications is not None:
                         if chosen_model is not None and item[0] == chosen_model:
+                            temp_filename = os.path.join(os.path.dirname(filename), '.' + os.path.basename(filename))
                             print("=> {}".format(filename))
-                            cv2.imwrite(filename, item[1])
+                            cv2.imwrite(temp_filename, item[1])
+                            os.remove(filename)
+                            os.rename(temp_filename, filename)
                     else:
                         newImageName = filename.replace(".jpg", "_" + "ano_" + item[0] + ".jpg")
                         print("=> {}".format(newImageName))
