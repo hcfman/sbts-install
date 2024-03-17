@@ -49,7 +49,6 @@ async def run_subprocess_async(command):
         await asyncio.sleep(0.1)
     process.wait()
 
-
 async def markupWithAnnotations(request):
     global cameras, debug
 
@@ -59,15 +58,15 @@ async def markupWithAnnotations(request):
 
     data = await request.post();
     eventTime = data.get('eventTime')
-    if not re.match('^\d+$', cam):
+    if cam is None or not re.match('^\d+$', cam):
         print("Bad cam")
         return web.Response(text='Nok')
 
     notification = request.match_info.get('notification', "")
-    if len(notification) == 0 or re.match('.*["\'].*$', notification):
+    if notification is None or len(notification) == 0 or re.match('.*["\'].*$', notification):
         return web.Response(text='Nok')
 
-    if not re.match('^\d+$', eventTime):
+    if eventTime is None or not re.match('^\d+$', eventTime):
         return web.Response(text='Nok')
 
     date_string = datetime.fromtimestamp(int(int(eventTime) / 1000)).strftime('%Y-%m-%d')
@@ -75,7 +74,7 @@ async def markupWithAnnotations(request):
     if not Path(args.image_dir + "/" + cam).exists():
         return web.Response(text='Nok')
 
-    if not cam_name in cameras:
+    if cam_name is None or not cam_name in cameras:
         return web.Response(text='Nok')
 
     if notification not in notify_map[cam_name]:
