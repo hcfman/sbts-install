@@ -109,11 +109,10 @@ def webServer():
     secureConfig = readConfigFile()
     cameras = secureConfig.getCameras()
     notify_map = {};
-    for camera in cameras:
-        for cam in cameras:
-            notify_map[cam] = {}
-            for notify in cameras[cam].getNotifyList():
-                notify_map[cam][notify.getName()] = notify
+    for cam in cameras:
+        notify_map[cam] = {}
+        for notify in cameras[cam].getNotifyList():
+            notify_map[cam][notify.getName()] = notify
 
     app = web.Application()
     app.router.add_post('/markup/{cam}/{camName}/{range}/{notification}', markupWithAnnotations)
