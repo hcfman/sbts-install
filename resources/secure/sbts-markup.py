@@ -2,16 +2,17 @@
 
 # Copyright, 2024, Kim Hendrikse
 
-import asyncio
-from aiohttp import web
-import json
-import sys
-import os
-import subprocess
 import argparse
+import asyncio
+import json
+import os
 import re
-from pathlib import Path
+import sys
 from datetime import datetime
+from pathlib import Path
+import subprocess
+
+from aiohttp import web
 
 from multi_secureparse.model import SecureConfig, CameraReader, ModelMap
 
@@ -38,10 +39,28 @@ def readConfigFile():
         print("Insufficient permissions to read the configuration file.")
         sys.exit(1)
 
-
-async def run_subprocess_async(command):
-    process = await asyncio.create_subprocess_shell(command)
+async def run_script(command):
+    # This is a coroutine that runs the script and waits for it to finish.
+    process = await asyncio.create_subprocess_exec(*command, stdout=None, stderr=None)
     await process.wait()
+
+async def start_background_tasks(app):
+    app['queue'] = asyncio.Queue()
+    # Use asyncio.ensure_future for compatibility with Python 3.6
+    app['script_runner_task'] = asyncio.ensure_future(script_runner(app))
+
+async def cleanup_background_tasks(app):
+    app['script_runner_task'].cancel()
+    await app['script_runner_task']
+
+async def script_runner(app):
+    while True:
+        # Wait indefinitely until an item is available in the queue.
+        command = await app['queue'].get()
+        await run_script(command)
+        # Mark the current task as done.
+        app['queue'].task_done()
+
 
 async def markupWithAnnotations(request):
     global cameras, debug
@@ -74,15 +93,17 @@ async def markupWithAnnotations(request):
     if notification not in notify_map[cam_name]:
         return web.Response(text='Nok')
 
-    command = args.sbts_annotate + " -N " + image_range + " -n '" + notification + "' " + args.configFile + " '" + cam_name + "' " + args.image_dir + "/" + cam + "/" + date_string + "/" + eventTime
+    command = [args.sbts_annotate, '-N',  image_range, '-n', notification, args.configFile, cam_name, args.image_dir + "/" + cam + "/" + date_string + "/" + eventTime]
     if debug:
         print("Command: {0}".format(command))
 
-    await run_subprocess_async(command)
+    await request.app['queue'].put(command)
 
     return web.Response(text="Ok")
 
-async def webServer():
+def webServer():
+    global app
+
     global cameras, notify_map
 
     secureConfig = readConfigFile()
@@ -96,16 +117,11 @@ async def webServer():
 
     app = web.Application()
     app.router.add_post('/markup/{cam}/{camName}/{range}/{notification}', markupWithAnnotations)
-    runner = web.AppRunner(app)
-    await runner.setup()
 
-    site = web.TCPSite(runner, server_bind_address, server_port)
-    await site.start()
+    app.on_startup.append(start_background_tasks)
+    app.on_cleanup.append(cleanup_background_tasks)
 
-async def main():
-    await webServer()
-    while True:
-        await asyncio.sleep(3600)
+    web.run_app(app, host=args.bind_address, port=int(server_port))
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-b", "--bind", dest="bind_address", help="Bind address for the control server")
@@ -130,15 +146,6 @@ if args.configFile is None:
     sys.exit(1)
 
 if __name__ == '__main__':
-    # Check if asyncio.run is available (Python 3.7+)
-    try:
-        asyncio.run(main())
-    except AttributeError:
-        # Fallback for Python 3.6 and earlier
-        loop = asyncio.get_event_loop()
-        try:
-            loop.run_until_complete(main())
-        finally:
-            loop.close()
+    webServer()
 
 os._exit(1)
