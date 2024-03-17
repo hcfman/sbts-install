@@ -40,14 +40,8 @@ def readConfigFile():
 
 
 async def run_subprocess_async(command):
-    process = subprocess.Popen(command)
-
-    while True:
-        retcode = process.poll()
-        if retcode is not None:
-            break
-        await asyncio.sleep(0.1)
-    process.wait()
+    process = await asyncio.create_subprocess_shell(command)
+    await process.wait()
 
 async def markupWithAnnotations(request):
     global cameras, debug
@@ -80,7 +74,7 @@ async def markupWithAnnotations(request):
     if notification not in notify_map[cam_name]:
         return web.Response(text='Nok')
 
-    command = [args.sbts_annotate, "-N", image_range, "-n", notification, args.configFile, cam_name, args.image_dir + "/" + cam + "/" + date_string + "/" + eventTime]
+    command = args.sbts_annotate + " -N " + image_range + " -n " + notification + " " + args.configFile + " " + cam_name + " " + args.image_dir + "/" + cam + "/" + date_string + "/" + eventTime
     if debug:
         print("Command: {0}".format(command))
 
