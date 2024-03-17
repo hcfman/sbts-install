@@ -47,6 +47,8 @@ async def run_subprocess_async(command):
         if retcode is not None:
             break
         await asyncio.sleep(0.1)
+    process.wait()
+
 
 async def markupWithAnnotations(request):
     global cameras, debug
